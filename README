@@ -1,0 +1,20 @@
+Provides a nice API for cassandra backed storage:
+
+class Customer < CassandraObject::Base
+
+  attr :first_name, :type=>String
+  attr :last_name,  :type=>Date
+  
+  has_many :invoices
+  
+  before_save :something
+  after_save :something_else
+  
+  validate :some_validation
+
+
+  indexed_by :UserRelationships, "mentions_timeline" do
+    self.text.grep(MENTION_REGEX).map(&:user_name_to_key)
+  end
+
+end
