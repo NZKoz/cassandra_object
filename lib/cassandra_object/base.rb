@@ -26,15 +26,10 @@ module CassandraObject
         @options = options
       end
       
+      
+      # I think this should live somewhere 
       def check_value!(value)
-        return value if value.nil? || value.is_a?(expected_type)
-        
-        if expected_type == Date
-          value = Date.strptime(value, "%Y-%m-%d") 
-        end
-        unless value.is_a?(expected_type)
-          raise TypeError, "#{@name} must be a #{expected_type.inspect} but you gave #{value.inspect}"
-        end
+        value
       end
       
       def expected_type
@@ -67,6 +62,10 @@ module CassandraObject
         end
         connection.insert(column_family, id, attributes.stringify_keys)
         return id
+      end
+      
+      def all(keyrange = ''..'', options = {})
+        connection.get_key_range(column_family, keyrange, options[:limit] || 100).map {|key| get(key) }
       end
     end
     extend Fetching
