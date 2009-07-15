@@ -2,8 +2,8 @@ Provides a nice API for cassandra backed storage:
 
 class Customer < CassandraObject::Base
 
-  attr :first_name, :type=>String
-  attr :last_name,  :type=>Date
+  attribrute :first_name, :type=>String
+  attribrute :last_name,  :type=>Date
   
   has_many :invoices
   
