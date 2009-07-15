@@ -49,6 +49,8 @@ module CassandraObject
       def get(id)
         attr_names = attributes.values.map(&:name)
         attr_values = connection.get_columns(column_family, id, attr_names)
+        # Can't use constructor for both 'fetch' and 'new'
+        # take approach from AR.
         new(id, Hash[*attr_names.zip(attr_values).flatten])
       end
 
@@ -85,6 +87,8 @@ module CassandraObject
       @changed_attribute_names = Set.new
     end
     
+    
+    # All this stuff should probably come from AMo
     def method_missing(name, *args)
       name = name.to_s
       if name =~ /^(.*)=$/
