@@ -73,9 +73,25 @@ module CassandraObject
     end
     extend Writing
     
-    def self.next_id
-      [Time.now.utc.strftime("%Y%m%d%H%M%S"), Process.pid, rand(1024)] * ""
+    
+    module Keys
+      def key(name = :uuid, &blk)
+        if block_given?
+          @key = blk
+        else
+          case name
+          when :uuid
+            lambda {|rec| [Time.now.utc.strftime("%Y%m%d%H%M%S"), Process.pid, rand(1024)] * "" }
+          end
+        end
+      end
+      
+      def next_id
+        @key.call
+      end
     end
+    extend Keys
+    
     
 
     include ActiveSupport::Callbacks
