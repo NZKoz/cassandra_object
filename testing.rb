@@ -19,6 +19,32 @@ class Customer < CassandraObject::Base
   attribute :first_name,    :type=>String
   attribute :last_name,     :type=>String
   attribute :date_of_birth, :type=>Date
+
+  before_save :do_before_save
+  after_save  :do_after_save
+
+  before_create :do_before_create
+  after_create :do_after_create
+
+  private
+
+  def do_before_save
+    puts "BEFORE SAVE #{id}"
+  end
+
+  def do_after_save
+    puts "AFTER SAVE #{id}"
+  end
+
+  def do_before_create
+    puts "BEFORE CREATE #{id}"
+  end
+
+  def do_after_create
+    puts "AFTER CREATE #{id}"
+  end
+
+
 end
 
 # c = Customer.create! :first_name=>"Michael", :last_name=>"Koziarski", :date_of_birth=>28.years.ago.to_date
@@ -29,13 +55,14 @@ end
 # 
 # client.insert(:Customers, "1", "first_name"=>"Michael", "last_name"=>"Koziarski", "date_of_birth"=>"1980-08-15")
 # 
-# pp cust = Customer.get("1")
+pp cust = Customer.get("1")
+
+pp cust.first_name
+
+cust.first_name="Michael"
+cust.save
 # 
-# pp cust.first_name
-# 
-# cust.first_name="Michael"
-# cust.save
-# 
-# pp Customer.create(:first_name=>"Anika", :last_name=>"Koziarski", :date_of_birth=>Date.parse("1979-12-31"))
+
+pp Customer.create(:first_name=>"Anika", :last_name=>"Koziarski", :date_of_birth=>Date.parse("1979-12-31"))
 
 pp Customer.all

@@ -79,6 +79,12 @@ module CassandraObject
       [Time.now.utc.strftime("%Y%m%d%H%M%S"), Process.pid, rand(1024)] * ""
     end
     
+
+    include ActiveSupport::Callbacks
+    define_callbacks :before_save, :after_save, :before_create, :after_create
+
+
+
     attr_reader :id, :attributes
     
     def initialize(id, attributes)
@@ -135,7 +141,13 @@ module CassandraObject
     end
     
     def save
-      @id = self.class.write(id, changed_attributes)
+      if was_new_record = new_record?
+        run_callbacks :before_create
+      end
+      run_callbacks :before_save
+      @id ||= self.class.write(id, changed_attributes)
+      run_callbacks :after_save
+      run_callbacks :after_create if was_new_record
       self
     end
   end
