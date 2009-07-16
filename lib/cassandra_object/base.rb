@@ -79,9 +79,9 @@ module CassandraObject
         if block_given?
           @key = blk
         else
-          case name
+          @key = case name
           when :uuid
-            lambda {|rec| [Time.now.utc.strftime("%Y%m%d%H%M%S"), Process.pid, rand(1024)] * "" }
+            lambda { [Time.now.utc.strftime("%Y%m%d%H%M%S"), Process.pid, rand(1024)] * "" }
           end
         end
       end
@@ -117,13 +117,47 @@ module CassandraObject
       end
     end
     
+    class Index
+      def initialize(attribute_name, model_class)
+        @attribute_name = attribute_name
+        @model_class    = model_class
+      end
+      
+      def find(attribute_value)
+        # first find the id values
+        ids = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name)
+        # then pass to get
+        ids.keys.map {|id| @model_class.get(id) }
+      end
+      
+      def write(record)
+        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.id=>nil}})
+      end
+      
+      def column_family
+        @model_class.to_s + "Indexes"
+      end
+    end
+    
     module Indexes
-      def index(attribute_name, options)
+      def index(attribute_name, options = {})
         self.indexes ||= {}.with_indifferent_access
         if options[:unique]
           self.indexes[attribute_name] = UniqueIndex.new(attribute_name, self)
           class_eval <<-eom
             def self.find_by_#{attribute_name}(value)
+              indexes[:#{attribute_name}].find(value)
+            end
+            
+            after_save do |record|
+              self.indexes[:#{attribute_name}].write(record)
+            end
+              
+          eom
+        else
+          self.indexes[attribute_name] = Index.new(attribute_name, self)
+          class_eval <<-eom
+            def self.find_all_by_#{attribute_name}(value)
               indexes[:#{attribute_name}].find(value)
             end
             

@@ -13,7 +13,12 @@ require 'pp'
 # 
 # <Table Name="KozSandra">
 #   <ColumnFamily ColumnSort="Name" Name="Customers" />
+#   <ColumnFamily ColumnType="Super" ColumnSort="Name" Name="CustomerRelationships" />
+#   <ColumnFamily ColumnSort="Name" Name="Invoices" />
+#   <ColumnFamily ColumnType="Super" ColumnSort="Name" Name="InvoiceIndexes" />
+#   <ColumnFamily ColumnSort="Name" Name="InvoicesByNumber" />
 # </Table>
+
 
 
 
@@ -28,11 +33,13 @@ class Customer < CassandraObject::Base
   validate :should_be_cool
 
   key :uuid
+  
+  index :last_name
 
   private
   
   def should_be_cool
-    unless ["Michael", "Anika"].include?(first_name)
+    unless ["Michael", "Anika", "Evan"].include?(first_name)
       errors.add(:first_name, "must be that of a cool person")
     end
   end
@@ -67,7 +74,10 @@ end
 # 
 
 # pp Customer.create(:first_name=>"Anika", :last_name=>"Koziarski", :date_of_birth=>Date.parse("1979-12-31"))
-
 pp i = Invoice.create(:number=>Time.now.to_i)
 
 pp Invoice.find_by_number(i.number)
+
+pp Customer.create(:first_name=>"Evan", :last_name=>"Weaver")
+
+pp Customer.find_all_by_last_name("Weaver")
