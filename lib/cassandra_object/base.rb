@@ -54,6 +54,13 @@ module CassandraObject
         new(id, Hash[*attr_names.zip(attr_values).flatten])
       end
 
+      def all(keyrange = ''..'', options = {})
+        connection.get_key_range(column_family, keyrange, options[:limit] || 100).map {|key| get(key) }
+      end
+    end
+    extend Fetching
+
+    module Writing
       def create(attributes)
         new(nil, attributes).save
       end
@@ -65,13 +72,8 @@ module CassandraObject
         connection.insert(column_family, id, attributes.stringify_keys)
         return id
       end
-      
-      def all(keyrange = ''..'', options = {})
-        connection.get_key_range(column_family, keyrange, options[:limit] || 100).map {|key| get(key) }
-      end
     end
-    extend Fetching
-    
+    extend Writing
     
     def self.next_id
       [Time.now.utc.strftime("%Y%m%d%H%M%S"), Process.pid, rand(1024)] * ""
