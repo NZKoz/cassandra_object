@@ -2,19 +2,34 @@ Provides a nice API for cassandra backed storage:
 
 class Customer < CassandraObject::Base
 
-  attribrute :first_name, :type=>String
-  attribrute :last_name,  :type=>Date
+  key do 
+    rand(2**63).to_s
+  end
+
+  attribute :first_name, :type=>String
+  attribute :last_name,  :type=>String
   
-  has_many :invoices
+  # Timestamps can eventually use the internal per-column stamps, but this is fine
+  attribute :created_at,  :type=>Date
   
   before_save :something
   after_save :something_else
   
   validate :some_validation
+end
 
+class Invoice < CassandraObject::Base
 
-  indexed_by :UserRelationships, "mentions_timeline" do
-    self.text.grep(MENTION_REGEX).map(&:user_name_to_key)
-  end
+  # Requires you to pass a Customer instance and a number at .create
+  # Hell on earth if the natural components changes
+  key [Customer, Integer] 
 
+  # Opaque JSON object
+  attribute :lines, :type=>JSON 
+  attribute :date,  :type=>Date
+  
+  before_save :something
+  after_save :something_else
+  
+  validate :some_validation
 end
