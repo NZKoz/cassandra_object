@@ -24,12 +24,16 @@ class Customer < CassandraObject::Base
   attribute :first_name,    :type=>String
   attribute :last_name,     :type=>String
   attribute :date_of_birth, :type=>Date
+  
+  validate :should_be_cool
 
   before_save :do_before_save
   after_save  :do_after_save
 
   before_create :do_before_create
   after_create :do_after_create
+  
+  before_validation :do_before_validation
 
   private
 
@@ -47,6 +51,16 @@ class Customer < CassandraObject::Base
 
   def do_after_create
     puts "AFTER CREATE #{id}"
+  end
+  
+  def do_before_validation
+    puts "BEFORE VALIDATION #{id}"
+  end
+  
+  def should_be_cool
+    unless ["Michael", "Anika"].include?(first_name)
+      errors.add(:first_name, "must be that of a cool person")
+    end
   end
 
 
@@ -70,4 +84,3 @@ cust.save
 
 pp Customer.create(:first_name=>"Anika", :last_name=>"Koziarski", :date_of_birth=>Date.parse("1979-12-31"))
 
-pp Customer.all

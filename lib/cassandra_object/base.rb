@@ -82,6 +82,8 @@ module CassandraObject
 
     include ActiveSupport::Callbacks
     define_callbacks :before_save, :after_save, :before_create, :after_create
+    include ActiveModel::Validations
+    define_callbacks :before_validation
 
 
 
@@ -141,13 +143,16 @@ module CassandraObject
     end
     
     def save
-      if was_new_record = new_record?
-        run_callbacks :before_create
+      run_callbacks :before_validation
+      if valid?
+        if was_new_record = new_record?
+          run_callbacks :before_create
+        end
+        run_callbacks :before_save
+        @id ||= self.class.write(id, changed_attributes)
+        run_callbacks :after_save
+        run_callbacks :after_create if was_new_record
       end
-      run_callbacks :before_save
-      @id ||= self.class.write(id, changed_attributes)
-      run_callbacks :after_save
-      run_callbacks :after_create if was_new_record
       self
     end
   end
