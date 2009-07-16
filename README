@@ -15,6 +15,10 @@ class Customer < CassandraObject::Base
   before_save :something
   after_save :something_else
   
+  # Implies :through => :CustomerAssociations, :super_column_name => "invoices", :class_name => "Invoice"
+  # Created an after_destroy to clobber the CustomerAssociations row
+  association :to => :invoices
+  
   validate :some_validation
 end
 
@@ -30,6 +34,17 @@ class Invoice < CassandraObject::Base
   
   before_save :something
   after_save :something_else
+  
+  # Implies :through => :CustomerAssociations, :super_column_name => "invoices", :class_name => "Customer" 
+  # Creates an after save hook to insert
+  association :from => :customers do |parent_id|
+    # Return the customer keys to insert self.id into; in this case we get them from whatever was available to 
+    # some kind of attacher method
+    #   @customer.invoices.create()
+    # but it could be arbitrary.
+    # With double sided indexes you can also make after_destroy in either side remove entries properly
+    [parent_id] 
+  end  
   
   validate :some_validation
 end
