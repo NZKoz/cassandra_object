@@ -47,11 +47,9 @@ module CassandraObject
     
     module Fetching
       def get(id)
-        attr_names = attributes.values.map(&:name)
-        attr_values = connection.get_columns(column_family, id, attr_names)
         # Can't use constructor for both 'fetch' and 'new'
         # take approach from AR.
-        new(id, Hash[*attr_names.zip(attr_values).flatten])
+        new(id, connection.get(column_family, id))
       end
 
       def all(keyrange = ''..'', options = {})
