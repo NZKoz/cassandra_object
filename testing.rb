@@ -4,6 +4,14 @@ require 'activesupport'
 require 'cassandra_object/base'
 require 'pp'
 
+# Assumes a storage config with this:
+# 
+# <Table Name="KozSandra">
+#   <ColumnFamily ColumnSort="Name" Name="Customers" />
+# </Table>
+
+
+
 CassandraObject::Base.establish_connection "KozSandra"
 
 
