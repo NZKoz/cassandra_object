@@ -10,7 +10,7 @@ class Customer < CassandraObject::Base
   attribute :last_name,  :type=>String
   attribute :screen_name, :type=>String
   
-  # Timestamps can eventually use the internal per-column stamps, but this is fine
+  # Timestamps can eventually use the internal per-column stamps
   attribute :created_at,  :type=>Date
   
   before_save :something
@@ -21,8 +21,8 @@ class Customer < CassandraObject::Base
   association :to => :invoices
 
   # Implies :through => :ScreenNameCustomer
-  # This makes a row in a bridge CF: self.screen_name => {'id' => self.id}, and defines
-  # a finder Customer.find_by_screen_name()
+  # This makes a row in a bridge CF: self.screen_name => {'id' => self.id}, and 
+  # defines a finder Customer.find_by_screen_name()
   # For non-unique compound keys must be used
   index :screen_name, :unique => true
   
@@ -45,11 +45,14 @@ class Invoice < CassandraObject::Base
   # Implies :through => :CustomerAssociations, :super_column_name => "invoices", :class_name => "Customer" 
   # Creates an after save hook to insert
   association :from => :customers do |parent_id|
-    # Return the customer keys to insert self.id into; in this case we get them from whatever was available to 
-    # some kind of attacher method
+    # Return the customer keys to insert self.id into; in this case we get them from 
+    # whatever was available to some kind of attacher method
     #   @customer.invoices.create()
     # but it could be arbitrary.
-    # With double sided indexes you can also make after_destroy in either side remove entries properly
+    #
+    # With double sided indexes you can also make after_destroy in either side remove 
+    # entries properly. Without them, you have to do read-repairs if you hit a record
+    # on the parent side that doesn't exist anymore.
     [parent_id] 
   end  
   
