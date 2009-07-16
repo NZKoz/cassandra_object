@@ -8,6 +8,7 @@ class Customer < CassandraObject::Base
 
   attribute :first_name, :type=>String
   attribute :last_name,  :type=>String
+  attribute :screen_name, :type=>String
   
   # Timestamps can eventually use the internal per-column stamps, but this is fine
   attribute :created_at,  :type=>Date
@@ -18,6 +19,12 @@ class Customer < CassandraObject::Base
   # Implies :through => :CustomerAssociations, :super_column_name => "invoices", :class_name => "Invoice"
   # Created an after_destroy to clobber the CustomerAssociations row
   association :to => :invoices
+
+  # Implies :through => :ScreenNameCustomer
+  # This makes a row in a bridge CF: self.screen_name => {'id' => self.id}, and defines
+  # a finder Customer.find_by_screen_name()
+  # For non-unique compound keys must be used
+  index :screen_name, :unique => true
   
   validate :some_validation
 end
