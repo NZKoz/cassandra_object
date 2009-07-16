@@ -4,7 +4,7 @@ require 'set'
 module CassandraObject
   class Base
     
-    superclass_delegating_accessor :connection
+    class_inheritable_accessor :connection
     module ConnectionManagement
       def establish_connection(*args)
         self.connection = CassandraClient.new(*args)
@@ -37,7 +37,7 @@ module CassandraObject
       end
     end
     
-    superclass_delegating_accessor :attributes
+    class_inheritable_accessor :attributes
     module Attributes
       def attribute(name, options)
         (self.attributes ||= ActiveSupport::OrderedHash.new)[name.to_s] = Attribute.new(name, options)
