@@ -1,0 +1,17 @@
+# CassandraDB object mapper scope
+
+# object-y things...more important
+
+* relationship queries (against supercolumn indexes)
+* triggers (primarily for updating relationships)
+* domain validations
+* read-repair migrations (e.g. define update rules for when you read 
+  an unmigrated record and have to convert it...might require a schema version column)
+
+# storage-y things...less important
+
+* type casting (esp. dates)
+* optional strict or relaxed field lists
+* serialization (should probably steal or mask the serialization in the current client)
+* some kind of crap to let you do column_family compound key indexes (cluster-wide) 
+  the same way as supercolumn indexes
