@@ -6,6 +6,7 @@ require 'cassandra_object/validation'
 require 'cassandra_object/callbacks'
 require 'cassandra_object/identity'
 require 'cassandra_object/indexes'
+require 'cassandra_object/serialization'
 
 module CassandraObject
   class Base
@@ -29,7 +30,8 @@ module CassandraObject
     include Identity
     include Attributes
     include Persistence
-    include Indexes 
+    include Indexes
+    include Serialization
     
     
 
