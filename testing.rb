@@ -35,6 +35,8 @@ class Customer < CassandraObject::Base
   key :uuid
   
   index :last_name
+  
+  has_many :invoices
 
   private
   
@@ -59,26 +61,38 @@ end
 
 # c = Customer.create! :first_name=>"Michael", :last_name=>"Koziarski", :date_of_birth=>28.years.ago.to_date
 # 
-# client = CassandraObject::Base.connection
+client = CassandraObject::Base.connection
 # pp client.get_key_range("Customer")
 
 # 
-# client.insert(:Customers, "1", "first_name"=>"Michael", "last_name"=>"Koziarski", "date_of_birth"=>"1980-08-15")
+# client.insert(:CustomerRelationships, "1", "invoices"=>{Invoice.first.id=>nil})
+# # 
+# pp cust = Customer.first
 # 
-pp cust = Customer.first
+# pp cust.first_name
+# 
+# cust.first_name="Michael"
+# cust.save
+# 
+# pp cust.to_json
+# 
+# # pp Customer.create(:first_name=>"Anika", :last_name=>"Koziarski", :date_of_birth=>Date.parse("1979-12-31"))
+# pp i = Invoice.create(:number=>Time.now.to_i)
+# 
+# pp Invoice.find_by_number(i.number)
+# 
+# pp Customer.create(:first_name=>"Evan", :last_name=>"Weaver")
+# 
+# pp Customer.find_all_by_last_name("Weaver")
 
-pp cust.first_name
 
-cust.first_name="Michael"
-cust.save
 
-pp cust.to_json
+i = Invoice.all.rand
+c = Customer.first
 
-# pp Customer.create(:first_name=>"Anika", :last_name=>"Koziarski", :date_of_birth=>Date.parse("1979-12-31"))
-pp i = Invoice.create(:number=>Time.now.to_i)
 
-pp Invoice.find_by_number(i.number)
+c.invoices << i
 
-pp Customer.create(:first_name=>"Evan", :last_name=>"Weaver")
+pp c.invoices.to_a
 
-pp Customer.find_all_by_last_name("Weaver")
+
