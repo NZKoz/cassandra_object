@@ -13,6 +13,10 @@ module CassandraObject
         connection.get_key_range(column_family, keyrange, options[:limit] || 100).map {|key| get(key) }
       end
       
+      def first(keyrange = ''..'', options = {})
+        all(keyrange, options.merge(:limit=>1)).first
+      end
+      
       def create(attributes)
         new(nil, attributes).save
       end

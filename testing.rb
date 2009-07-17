@@ -65,7 +65,7 @@ end
 # 
 # client.insert(:Customers, "1", "first_name"=>"Michael", "last_name"=>"Koziarski", "date_of_birth"=>"1980-08-15")
 # 
-pp cust = Customer.get("1")
+pp cust = Customer.first
 
 pp cust.first_name
 
