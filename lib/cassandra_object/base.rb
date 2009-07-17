@@ -1,5 +1,6 @@
 require 'cassandra_client'
 require 'set'
+require 'cassandra_object/attributes'
 
 module CassandraObject
   class Base
@@ -19,31 +20,8 @@ module CassandraObject
     end
     extend Naming
     
-    class Attribute
-      attr_reader :name
-      def initialize(name, options)
-        @name = name.to_s
-        @options = options
-      end
-      
-      
-      # I think this should live somewhere 
-      def check_value!(value)
-        value
-      end
-      
-      def expected_type
-        @options[:type] || String
-      end
-    end
-    
-    class_inheritable_accessor :attributes
-    module Attributes
-      def attribute(name, options)
-        (self.attributes ||= ActiveSupport::OrderedHash.new)[name.to_s] = Attribute.new(name, options)
-      end
-    end
-    extend Attributes
+
+    include Attributes
     
     module Fetching
       def get(id)
@@ -158,11 +136,11 @@ module CassandraObject
           self.indexes[attribute_name] = Index.new(attribute_name, self)
           class_eval <<-eom
             def self.find_all_by_#{attribute_name}(value)
-              indexes[:#{attribute_name}].find(value)
+              self.indexes[:#{attribute_name}].find(value)
             end
             
             after_save do |record|
-              self.indexes[:#{attribute_name}].write(record)
+              record.class.indexes[:#{attribute_name}].write(record)
             end
               
           eom
@@ -188,46 +166,6 @@ module CassandraObject
       @attributes = {}.with_indifferent_access
       self.attributes=attributes
       @changed_attribute_names = Set.new
-    end
-    
-    
-    # All this stuff should probably come from AMo
-    def method_missing(name, *args)
-      name = name.to_s
-      if name =~ /^(.*)=$/
-        write_attribute($1, args.first)
-      elsif @attributes.include?(name)
-        read_attribute(name)
-      else
-        super
-      end
-    end
-    
-    def write_attribute(name, value)
-      value = self.class.attributes[name].check_value!(value)
-      @changed_attribute_names << name
-      @attributes[name] = value
-    end
-    
-    def read_attribute(name)
-      @attributes[name]
-    end
-    
-    def changed_attributes
-      if new_record?
-        @attributes
-      else
-        @changed_attribute_names.inject({}) do |memo, name|
-          memo[name] = read_attribute(name)
-          memo
-        end
-      end
-    end
-    
-    def attributes=(attributes)
-      attributes.each do |(name, value)|
-        send("#{name}=", value)
-      end
     end
         
     
