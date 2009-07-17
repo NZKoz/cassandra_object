@@ -71,7 +71,8 @@ pp cust.first_name
 
 cust.first_name="Michael"
 cust.save
-# 
+
+pp cust.to_json
 
 # pp Customer.create(:first_name=>"Anika", :last_name=>"Koziarski", :date_of_birth=>Date.parse("1979-12-31"))
 pp i = Invoice.create(:number=>Time.now.to_i)

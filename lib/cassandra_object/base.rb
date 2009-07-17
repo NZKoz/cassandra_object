@@ -31,7 +31,6 @@ module CassandraObject
     include Attributes
     include Persistence
     include Indexes
-    include Serialization
     
     
 
@@ -42,7 +41,10 @@ module CassandraObject
 
 
     attr_reader :id, :attributes
-    
+
+    include Serialization
+
+
     def initialize(id, attributes)
       @id = id
       @changed_attribute_names = Set.new
