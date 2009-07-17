@@ -49,6 +49,64 @@ module CassandraObject
       end
     end
     
+    class OneToOneAssociation
+      def initialize(association_name, owner_class, target_class_name)
+        @association_name  = association_name.to_s
+        @owner_class       = owner_class
+        @target_class_name = target_class_name
+        define_methods!
+      end
+      
+      def define_methods!
+        @owner_class.class_eval <<-eos
+          def #{@association_name}
+            @_#{@association_name} ||= self.class.associations[:#{@association_name}].find(self)
+          end
+          
+          def #{@association_name}=(record)
+            @_#{@association_name} = record
+            self.class.associations[:#{@association_name}].set(self, record)
+          end
+        eos
+      end
+      
+      def clear(owner)
+        connection.remove(column_family, owner.id, @association_name)
+      end
+      
+      def find(owner)
+        if id = connection.get(column_family, owner.id, @association_name.to_s, nil, -1, 1).keys.first
+          target_class.get(id)
+        else
+          nil
+        end
+      end  
+      
+      def set(owner, record)
+        clear(owner)
+        connection.insert(column_family, owner.id, {@association_name=>{record.id=>nil}})
+      end
+      
+      def column_family
+        @owner_class.to_s + "Relationships"
+      end
+      
+      def connection
+        @owner_class.connection
+      end
+      
+      def target_class
+        @target_class ||= @target_class_name.constantize
+      end
+      
+      def new_proxy(owner)
+        # OneToManyAssociationProxy.new(self, owner)
+      end
+      
+    end
+    
+    
+    
     class OneToManyAssociationProxy
       def initialize(association, owner)
         @association = association
@@ -76,6 +134,8 @@ module CassandraObject
         end
       end
       
+      alias to_a target
+      
       def loaded?
         defined?(@loaded) && @loaded
       end
@@ -85,6 +145,11 @@ module CassandraObject
       def has_many(association_name, options={})
         target_class_name = options[:class_name] || association_name.to_s.singularize.camelize
         associations[association_name] = OneToManyAssociation.new(association_name, self, target_class_name)
+      end
+      
+      def has_one(association_name, options = {})
+        target_class_name = options[:class_name] || association_name.to_s.camelize
+        associations[association_name] = OneToOneAssociation.new(association_name, self, target_class_name)
       end
     end
   end
