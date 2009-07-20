@@ -41,6 +41,10 @@ module CassandraObject
         run_callbacks :after_create if was_new_record
         self
       end
+
+      def new_record?
+        @key.nil?
+      end
     end
   end
 end

@@ -49,15 +49,7 @@ module CassandraObject
     def initialize(key, attributes)
       @key = key
       @changed_attribute_names = Set.new
-      @attributes = {}.with_indifferent_access
-      self.attributes=attributes
-      @changed_attribute_names = Set.new
+      @attributes = attributes.with_indifferent_access
     end
-        
-    
-    def new_record?
-      @key.nil?
-    end
-    
   end
 end
