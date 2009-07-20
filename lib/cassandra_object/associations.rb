@@ -142,14 +142,15 @@ module CassandraObject
     end
         
     module ClassMethods
-      def has_many(association_name, options={})
-        target_class_name = options[:class_name] || association_name.to_s.singularize.camelize
-        associations[association_name] = OneToManyAssociation.new(association_name, self, target_class_name)
-      end
       
-      def has_one(association_name, options = {})
-        target_class_name = options[:class_name] || association_name.to_s.camelize
-        associations[association_name] = OneToOneAssociation.new(association_name, self, target_class_name)
+      def association(association_name, options= {})
+        if options[:unique]
+          target_class_name = options[:class_name] || association_name.to_s.camelize
+          associations[association_name] = OneToOneAssociation.new(association_name, self, target_class_name)
+        else
+          target_class_name = options[:class_name] || association_name.to_s.singularize.camelize
+          associations[association_name] = OneToManyAssociation.new(association_name, self, target_class_name)
+        end
       end
     end
   end
