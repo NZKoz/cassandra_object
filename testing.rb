@@ -67,7 +67,7 @@ client = CassandraObject::Base.connection
 # pp client.get_key_range("Customer")
 
 # 
-# client.insert(:CustomerRelationships, "1", "invoices"=>{Invoice.first.id=>nil})
+# client.insert(:CustomerRelationships, "1", "invoices"=>{Invoice.first.key=>nil})
 # # 
 # pp cust = Customer.first
 # 
@@ -89,16 +89,14 @@ client = CassandraObject::Base.connection
 
 
 
-# c = Customer.all.rand
-# 
-# pp i = Invoice.first
-# 
-# pp i.customer
-# 
-# i.customer=c
-# 
-# pp i.customer
+c = Customer.all.rand
+
+pp i = Invoice.first
+
+pp i.customer
+
+i.customer=c
+
+pp i.customer
 
 
-pp Invoice.first.customer
-pp Invoice.first.customer.invoices

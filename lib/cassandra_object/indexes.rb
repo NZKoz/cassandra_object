@@ -13,14 +13,14 @@ module CassandraObject
       end
       
       def find(attribute_value)
-        # first find the id value
-        id = @model_class.connection.get(column_family, attribute_value.to_s, 'id')
+        # first find the key value
+        key = @model_class.connection.get(column_family, attribute_value.to_s, 'key')
         # then pass to get
-        @model_class.get(id)
+        @model_class.get(key)
       end
       
       def write(record)
-        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {'id'=>record.id})
+        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {'key'=>record.key})
       end
       
       def column_family
@@ -35,14 +35,14 @@ module CassandraObject
       end
       
       def find(attribute_value)
-        # first find the id values
-        ids = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name)
+        # first find the keys
+        res = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name)
         # then pass to get
-        ids.keys.map {|id| @model_class.get(id) }
+        res.keys.map {|key| @model_class.get(key) }
       end
       
       def write(record)
-        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.id=>nil}})
+        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.key=>nil}})
       end
       
       def column_family

@@ -3,10 +3,10 @@ module CassandraObject
     extend ActiveSupport::Concern
     
     module ClassMethods
-      def get(id)
+      def get(key)
         # Can't use constructor for both 'fetch' and 'new'
         # take approach from AR.
-        new(id, connection.get(column_family, id))
+        new(key, connection.get(column_family, key))
       end
 
       def all(keyrange = ''..'', options = {})
@@ -21,12 +21,12 @@ module CassandraObject
         new(nil, attributes).save
       end
 
-      def write(id, attributes)
-        unless id
-          id = next_id
+      def write(key, attributes)
+        unless key
+          key = next_key
         end
-        connection.insert(column_family, id, attributes.stringify_keys)
-        return id
+        connection.insert(column_family, key, attributes.stringify_keys)
+        return key
       end
     end
     
@@ -36,7 +36,7 @@ module CassandraObject
           run_callbacks :before_create
         end
         run_callbacks :before_save
-        @id ||= self.class.write(id, changed_attributes)
+        @key ||= self.class.write(key, changed_attributes)
         run_callbacks :after_save
         run_callbacks :after_create if was_new_record
         self

@@ -18,12 +18,12 @@ module CassandraObject
       end
       
       def find(owner)
-        ids = connection.get(column_family, owner.id, @association_name)
-        ids.keys.map {|id| target_class.get(id) }
+        res = connection.get(column_family, owner.key, @association_name)
+        res.keys.map {|key| target_class.get(key) }
       end
       
       def add(owner, record)
-        connection.insert(column_family, owner.id, {@association_name=>{record.id=>nil}})
+        connection.insert(column_family, owner.key, {@association_name=>{record.key=>nil}})
       end
       
       def column_family
@@ -75,12 +75,12 @@ module CassandraObject
       end
       
       def clear(owner)
-        connection.remove(column_family, owner.id, @association_name)
+        connection.remove(column_family, owner.key, @association_name)
       end
       
       def find(owner)
-        if id = connection.get(column_family, owner.id, @association_name.to_s, nil, -1, 1).keys.first
-          target_class.get(id)
+        if key = connection.get(column_family, owner.key, @association_name.to_s, nil, -1, 1).keys.first
+          target_class.get(key)
         else
           nil
         end
@@ -88,7 +88,7 @@ module CassandraObject
       
       def set(owner, record)
         clear(owner)
-        connection.insert(column_family, owner.id, {@association_name=>{record.id=>nil}})
+        connection.insert(column_family, owner.key, {@association_name=>{record.key=>nil}})
       end
       
       def column_family

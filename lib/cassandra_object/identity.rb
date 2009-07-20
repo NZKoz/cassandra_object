@@ -13,7 +13,7 @@ module CassandraObject
         end
       end
     
-      def next_id
+      def next_key
         @key.call
       end
     end

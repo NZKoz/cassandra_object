@@ -41,13 +41,13 @@ module CassandraObject
 
 
 
-    attr_reader :id, :attributes
+    attr_reader :key, :attributes
 
     include Serialization
 
 
-    def initialize(id, attributes)
-      @id = id
+    def initialize(key, attributes)
+      @key = key
       @changed_attribute_names = Set.new
       @attributes = {}.with_indifferent_access
       self.attributes=attributes
@@ -56,7 +56,7 @@ module CassandraObject
         
     
     def new_record?
-      @id.nil?
+      @key.nil?
     end
     
   end
