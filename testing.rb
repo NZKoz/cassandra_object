@@ -100,3 +100,5 @@ client = CassandraObject::Base.connection
 # pp i.customer
 
 
+pp Invoice.first.customer
+pp Invoice.first.customer.invoices

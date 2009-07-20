@@ -8,10 +8,12 @@ module CassandraObject
     end
     
     class OneToManyAssociation
-      def initialize(association_name, owner_class, target_class_name)
+      def initialize(association_name, owner_class, options)
         @association_name  = association_name.to_s
         @owner_class       = owner_class
-        @target_class_name = target_class_name
+        @target_class_name = options[:class_name] || association_name.to_s.singularize.camelize
+        @options           = options
+        
         define_methods!
       end
       
@@ -50,10 +52,12 @@ module CassandraObject
     end
     
     class OneToOneAssociation
-      def initialize(association_name, owner_class, target_class_name)
+      def initialize(association_name, owner_class, options)
         @association_name  = association_name.to_s
         @owner_class       = owner_class
-        @target_class_name = target_class_name
+        @target_class_name = options[:class_name] || association_name.to_s.camelize 
+        @options           = options
+
         define_methods!
       end
       
@@ -145,11 +149,9 @@ module CassandraObject
       
       def association(association_name, options= {})
         if options[:unique]
-          target_class_name = options[:class_name] || association_name.to_s.camelize
-          associations[association_name] = OneToOneAssociation.new(association_name, self, target_class_name)
+          associations[association_name] = OneToOneAssociation.new(association_name, self, options)
         else
-          target_class_name = options[:class_name] || association_name.to_s.singularize.camelize
-          associations[association_name] = OneToManyAssociation.new(association_name, self, target_class_name)
+          associations[association_name] = OneToManyAssociation.new(association_name, self, options)
         end
       end
     end
