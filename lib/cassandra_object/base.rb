@@ -52,7 +52,7 @@ module CassandraObject
       # Hack
       @changed_attribute_names = Set.new
       self.attributes = attributes
-      changed_attribute_names.clear
+      @changed_attribute_names.clear
     end
   end
 end
