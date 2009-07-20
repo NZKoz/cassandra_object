@@ -46,10 +46,13 @@ module CassandraObject
     include Serialization
 
 
-    def initialize(key, attributes)
-      @key = key
+    def initialize(attributes)
+      @key = attributes.delete(:key)
+      @new_record = true
+      # Hack
       @changed_attribute_names = Set.new
-      @attributes = attributes.with_indifferent_access
+      self.attributes = attributes
+      changed_attribute_names.clear
     end
   end
 end

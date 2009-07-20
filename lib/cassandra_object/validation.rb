@@ -13,7 +13,7 @@ module CassandraObject
         if valid?
           super
         else
-          self
+          false
         end
       end
     end
