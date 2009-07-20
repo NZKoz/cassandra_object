@@ -36,7 +36,7 @@ class Customer < CassandraObject::Base
   
   index :last_name
   
-  association :invoices, :unique=>false
+  association :invoices, :unique=>false, :inverse_of=>:customer
 
   private
   
@@ -54,7 +54,7 @@ class Invoice < CassandraObject::Base
   
   index :number, :unique=>true
   
-  association :customer, :unique=>true
+  association :customer, :unique=>true, :inverse_of=>:invoices
   
   key do
     ActiveSupport::SecureRandom.hex(64)
@@ -91,12 +91,17 @@ client = CassandraObject::Base.connection
 
 c = Customer.all.rand
 
-pp i = Invoice.first
+i = Invoice.all.rand
 
-pp i.customer
+i.customer
 
-i.customer=c
+pp c.key
 
-pp i.customer
+pp i.customer.try(:key)
+
+c.invoices << i
 
 
+i = Invoice.get(i.key)
+
+pp i.customer.key

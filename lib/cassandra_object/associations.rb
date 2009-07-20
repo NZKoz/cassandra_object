@@ -22,8 +22,11 @@ module CassandraObject
         res.keys.map {|key| target_class.get(key) }
       end
       
-      def add(owner, record)
+      def add(owner, record, set_inverse = true)
         connection.insert(column_family, owner.key, {@association_name=>{record.key=>nil}})
+        if has_inverse? && set_inverse
+          inverse.set_inverse(record, owner)
+        end
       end
       
       def column_family
@@ -40,6 +43,18 @@ module CassandraObject
       
       def new_proxy(owner)
         OneToManyAssociationProxy.new(self, owner)
+      end
+      
+      def has_inverse?
+        @options[:inverse_of]
+      end
+      
+      def inverse
+        has_inverse? && target_class.associations[@options[:inverse_of]]
+      end
+      
+      def set_inverse(owner, record)
+        add(owner, record, false)
       end
       
       def define_methods!
@@ -86,11 +101,26 @@ module CassandraObject
         end
       end  
       
-      def set(owner, record)
+      def set(owner, record, set_inverse = true)
         clear(owner)
         connection.insert(column_family, owner.key, {@association_name=>{record.key=>nil}})
+        if has_inverse? && set_inverse
+          inverse.set_inverse(record, owner)
+        end
       end
       
+      def set_inverse(owner, record)
+        set(owner, record, false)
+      end
+      
+      def has_inverse?
+        @options[:inverse_of]
+      end
+      
+      def inverse
+        has_inverse? && target_class.associations[@options[:inverse_of]]
+      end
+
       def column_family
         @owner_class.to_s + "Relationships"
       end
