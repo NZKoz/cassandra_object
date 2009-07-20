@@ -53,13 +53,9 @@ module CassandraObject
       end
 
       def changed_attributes
-        if new_record?
-          @attributes
-        else
-          @changed_attribute_names.inject({}) do |memo, name|
-            memo[name] = read_attribute(name)
-            memo
-          end
+        @changed_attribute_names.inject({}) do |memo, name|
+          memo[name] = read_attribute(name)
+          memo
         end
       end
 

@@ -49,10 +49,8 @@ module CassandraObject
     def initialize(attributes)
       @key = attributes.delete(:key)
       @new_record = true
-      # Hack
       @changed_attribute_names = Set.new
       self.attributes = attributes
-      @changed_attribute_names.clear
     end
   end
 end
