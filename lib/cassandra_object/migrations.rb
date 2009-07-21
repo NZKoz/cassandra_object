@@ -28,7 +28,7 @@ module CassandraObject
     
     module InstanceMethods
       def changed_attributes
-        super
+        super.merge("schema_version"=>schema_version)
       end
       
       def schema_version
@@ -51,7 +51,7 @@ module CassandraObject
         if version.nil?
           # WTF do I do here? Assume 0 for now but seems wrongsauce?
           version = 0
-        elsif version == current_schema_version
+        elsif current_schema_version.nil? || version == current_schema_version
           return super(key, attributes)
         end
         

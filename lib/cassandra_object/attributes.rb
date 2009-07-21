@@ -7,7 +7,7 @@ module CassandraObject
     
     CONVERTERS = {}
     CONVERTERS[Date] = Proc.new do |str|
-      Date.strptime("%Y-%m-%d")
+      Date.strptime(str, "%Y-%m-%d")
     end
     
     CONVERTERS[Integer] = Proc.new do |str|
