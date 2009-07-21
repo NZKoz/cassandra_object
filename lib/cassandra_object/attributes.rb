@@ -119,7 +119,7 @@ module CassandraObject
 
       def changed_attributes
         @changed_attribute_names.inject({}) do |memo, name|
-          memo[name] = read_attribute(name)
+          memo[name] = send(name)
           memo
         end
       end
@@ -127,6 +127,12 @@ module CassandraObject
       def attributes=(attributes)
         attributes.each do |(name, value)|
           send("#{name}=", value)
+        end
+      end
+
+      def attributes_changed!(attributes)
+        attributes.each do |attr_name|
+          @changed_attribute_names << attr_name.to_s
         end
       end
     end

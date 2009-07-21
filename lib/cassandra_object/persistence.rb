@@ -32,7 +32,7 @@ module CassandraObject
       def instantiate(key, attributes)
         returning allocate do |object|
           object.instance_variable_set("@key", key)
-          object.instance_variable_set("@attributes", attributes)
+          object.instance_variable_set("@attributes", attributes.with_indifferent_access)
           object.instance_variable_set("@changed_attribute_names", Set.new)
         end
       end
@@ -44,7 +44,9 @@ module CassandraObject
           run_callbacks :before_create
         end
         run_callbacks :before_save
-        @key ||= self.class.write(key, changed_attributes)
+
+        returned_key = self.class.write(key, changed_attributes)
+        @key ||= returned_key
         run_callbacks :after_save
         run_callbacks :after_create if was_new_record
         @new_record = false
