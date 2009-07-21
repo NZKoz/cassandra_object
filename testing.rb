@@ -51,6 +51,7 @@ end
 
 class Invoice < CassandraObject::Base
   attribute :number, :type=>Integer
+  attribute :total, :type=>Float
   
   index :number, :unique=>true
   
@@ -88,20 +89,24 @@ client = CassandraObject::Base.connection
 # pp Customer.find_all_by_last_name("Weaver")
 
 
+# ["Hello I am not a date", Date.today, "1980-08-15"].each do |dob|
+#   pp "Trying #{dob.inspect}"
+#   c = Customer.new(:date_of_birth=>dob, :first_name=>"Michael")
+#   pp c.valid?
+#   pp c.errors
+# end
 
-c = Customer.all.rand
-
-i = Invoice.all.rand
-
-i.customer
-
-pp c.key
-
-pp i.customer.try(:key)
-
-c.invoices << i
+# ["I'm not an int", 1, "1", "-11"].each do |n|
+#   pp "trying #{n.inspect}"
+#   i = Invoice.new(:number=>n)
+#   i.valid?
+#   pp i.errors
+# end
 
 
-i = Invoice.get(i.key)
-
-pp i.customer.key
+["I'm not a float", 10.5, "10.5", "-11.5"].each do |n|
+  pp "trying #{n.inspect}"
+  i = Invoice.new(:total=>n, :number=>Time.now.to_i * rand(32))
+  i.valid?
+  pp i.errors
+end

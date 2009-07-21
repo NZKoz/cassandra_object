@@ -1,9 +1,17 @@
 module CassandraObject
   class Attribute
+    FORMATS = {}
+    FORMATS[Date] = /^\d{4}-\d{2}-\d{2}$/
+    FORMATS[Integer] = /^-?\d+$/
+    FORMATS[Float]   = /^-?\d*\.\d*$/
+    
     attr_reader :name
-    def initialize(name, options)
+    def initialize(name, owner_class, options)
       @name = name.to_s
+      @owner_class = owner_class
       @options = options
+      
+      append_validations!
     end
   
   
@@ -15,13 +23,20 @@ module CassandraObject
     def expected_type
       @options[:type] || String
     end
+    
+    def append_validations!
+      if f = FORMATS[expected_type]
+        @owner_class.validates_format_of @name, :with=>f, :unless => lambda {|obj| obj.send(name).is_a? expected_type }
+      end
+    end
+        
   end
 
   module Attributes
     extend ActiveSupport::Concern
     module ClassMethods
       def attribute(name, options)
-        (self.model_attributes ||= ActiveSupport::OrderedHash.new)[name.to_s] = Attribute.new(name, options)
+        (self.model_attributes ||= ActiveSupport::OrderedHash.new)[name.to_s] = Attribute.new(name, self, options)
       end
     end
   
