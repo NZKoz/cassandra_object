@@ -6,9 +6,7 @@ module CassandraObject
       def get(key)
         # Can't use constructor for both 'fetch' and 'new'
         # take approach from AR.
-        r = connection.get(column_family, key)
-        pp r
-        instantiate(key, r)
+        instantiate(key, connection.get(column_family, key))
       end
 
       def all(keyrange = ''..'', options = {})
@@ -26,7 +24,6 @@ module CassandraObject
       end
 
       def write(key, attributes)
-        pp attributes
         returning(key || next_key) do |key|
           connection.insert(column_family, key, attributes.stringify_keys)
         end
