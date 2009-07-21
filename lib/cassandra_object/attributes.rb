@@ -108,13 +108,20 @@ module CassandraObject
       end
 
       def write_attribute(name, value)
-        value = self.class.model_attributes[name].check_value!(value)
+        if ma = self.class.model_attributes[name]
+          value = ma.check_value!(value)
+        end
+          
         @changed_attribute_names << name
         @attributes[name] = value
       end
 
       def read_attribute(name)
-        self.class.model_attributes[name].type_cast(@attributes[name])
+        if ma = self.class.model_attributes[name]
+          ma.type_cast(@attributes[name])
+        else
+          @attributes[name]
+        end
       end
 
       def changed_attributes
