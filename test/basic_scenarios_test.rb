@@ -24,4 +24,8 @@ class BasicScenariosTest < CassandraObjectTestCase
   test "date_of_birth is a date" do
     assert @customer.date_of_birth.is_a?(Date)
   end
+  
+  test "should have a schema version of 0" do
+    assert_equal 0, @customer.schema_version
+  end
 end
