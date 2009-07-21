@@ -112,7 +112,7 @@ client = CassandraObject::Base.connection
 #   pp i.errors
 # end
 
- pp Invoice.all.map(&:changed_attributes)
+# pp Invoice.get("ASDFASDF")
+# pp Invoice.first.read_attribute(:zomg_wtf_hax)
 
-Invoice.first.read_attribute(:zomg_wtf_hax)
-
+pp Invoice.first.eql?(Invoice.first)
