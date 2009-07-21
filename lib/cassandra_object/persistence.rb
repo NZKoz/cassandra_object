@@ -34,7 +34,6 @@ module CassandraObject
           object.instance_variable_set("@key", key)
           object.instance_variable_set("@attributes", attributes)
           object.instance_variable_set("@changed_attribute_names", Set.new)
-          
         end
       end
     end

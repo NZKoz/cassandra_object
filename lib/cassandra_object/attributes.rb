@@ -5,6 +5,19 @@ module CassandraObject
     FORMATS[Integer] = /^-?\d+$/
     FORMATS[Float]   = /^-?\d*\.\d*$/
     
+    CONVERTERS = {}
+    CONVERTERS[Date] = Proc.new do |str|
+      Date.strptime("%Y-%m-%d")
+    end
+    
+    CONVERTERS[Integer] = Proc.new do |str|
+      Integer(str)
+    end
+    
+    CONVERTERS[Float] = Proc.new do |str|
+      Float(str)
+    end
+    
     attr_reader :name
     def initialize(name, owner_class, options)
       @name = name.to_s
@@ -24,10 +37,38 @@ module CassandraObject
       @options[:type] || String
     end
     
+    def type_cast(value)
+      if value.is_a?(expected_type)
+        value
+      elsif (converter = CONVERTERS[expected_type]) && (value =~ FORMATS[expected_type])
+        converter.call(value)
+      else
+        value
+      end
+    end
+    
     def append_validations!
       if f = FORMATS[expected_type]
         @owner_class.validates_format_of @name, :with=>f, :unless => lambda {|obj| obj.send(name).is_a? expected_type }
       end
+    end
+    
+    def define_methods!
+      @owner_class.class_eval <<-eos
+        def #{@name}
+          val = read_attribute(:#{@name})
+          if val.is_a?(#{expected_type.inspect})
+            val
+          else
+            self.class.attributes[:#{@name}].type_cast(val)
+          end
+        end
+        
+        def #{@name}=(val)
+          write_attribute(:#{@name}, val)
+        end
+            
+      eos
     end
         
   end
@@ -64,7 +105,7 @@ module CassandraObject
       end
 
       def read_attribute(name)
-        @attributes[name]
+        self.class.model_attributes[name].type_cast(@attributes[name])
       end
 
       def changed_attributes

@@ -104,9 +104,4 @@ client = CassandraObject::Base.connection
 # end
 
 
-["I'm not a float", 10.5, "10.5", "-11.5"].each do |n|
-  pp "trying #{n.inspect}"
-  i = Invoice.new(:total=>n, :number=>Time.now.to_i * rand(32))
-  i.valid?
-  pp i.errors
-end
+pp Invoice.all.map(&:total)
