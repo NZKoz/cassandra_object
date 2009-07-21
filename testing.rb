@@ -104,4 +104,3 @@ client = CassandraObject::Base.connection
 # end
 
 
-pp Invoice.all.map(&:total)

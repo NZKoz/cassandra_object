@@ -27,10 +27,19 @@ module CassandraObject
       append_validations!
     end
   
-  
-    # I think this should live somewhere 
+    # I think this should live somewhere in Amo
     def check_value!(value)
-      value
+      # Allow nil and Strings to fall back on the validations for typecasting
+      # Everything else gets checked with is_a?
+      if value.nil?
+        nil
+      elsif value.is_a?(String)
+        value
+      elsif value.is_a?(expected_type)
+        value
+      else
+        raise TypeError, "Expected #{expected_type.inspect} but got #{value.inspect}"
+      end
     end
   
     def expected_type
