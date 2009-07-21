@@ -52,10 +52,19 @@ end
 class Invoice < CassandraObject::Base
   attribute :number, :type=>Integer
   attribute :total, :type=>Float
+  attribute :gst_number, :type=>String
   
   index :number, :unique=>true
   
   association :customer, :unique=>true, :inverse_of=>:invoices
+  
+  migrate 1 do |attrs|
+    attrs["total"] ||= rand(2000) / 100.0
+  end
+  
+  migrate 2 do |attrs|
+    attrs["gst_number"] = "68-091-985"
+  end
   
   key do
     ActiveSupport::SecureRandom.hex(64)
@@ -103,4 +112,8 @@ client = CassandraObject::Base.connection
 #   pp i.errors
 # end
 
+ i = Invoice.first
+ i.valid?
+ pp i
+ i.save
 

@@ -8,6 +8,7 @@ require 'cassandra_object/identity'
 require 'cassandra_object/indexes'
 require 'cassandra_object/serialization'
 require 'cassandra_object/associations'
+require 'cassandra_object/migrations'
 
 module CassandraObject
   class Base
@@ -44,6 +45,7 @@ module CassandraObject
     attr_reader :key, :attributes
 
     include Serialization
+    include Migrations
 
 
     def initialize(attributes)

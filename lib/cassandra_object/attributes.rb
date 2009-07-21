@@ -129,7 +129,7 @@ module CassandraObject
           send("#{name}=", value)
         end
       end
-
+      
       def attributes_changed!(attributes)
         attributes.each do |attr_name|
           @changed_attribute_names << attr_name.to_s
