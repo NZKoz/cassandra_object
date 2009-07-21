@@ -48,7 +48,7 @@ module CassandraObject
     include Migrations
 
 
-    def initialize(attributes)
+    def initialize(attributes={})
       @key = attributes.delete(:key)
       @new_record = true
       @changed_attribute_names = Set.new

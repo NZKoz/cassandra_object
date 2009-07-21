@@ -6,7 +6,12 @@ module CassandraObject
       def get(key)
         # Can't use constructor for both 'fetch' and 'new'
         # take approach from AR.
-        instantiate(key, connection.get(column_family, key))
+        attributes = connection.get(column_family, key)
+        if attributes.empty?
+          nil
+        else
+          instantiate(key, attributes)
+        end
       end
 
       def all(keyrange = ''..'', options = {})
