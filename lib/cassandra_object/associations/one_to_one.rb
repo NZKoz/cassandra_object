@@ -27,7 +27,7 @@ module CassandraObject
     end
     
     def find(owner)
-      if key = connection.get(column_family, owner.key, @association_name.to_s, nil, -1, 1).keys.first
+      if key = connection.get(column_family, owner.key, @association_name.to_s, nil, 1).keys.first
         target_class.get(key)
       else
         nil

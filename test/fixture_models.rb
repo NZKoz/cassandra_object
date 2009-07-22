@@ -44,3 +44,5 @@ class Invoice < CassandraObject::Base
     ActiveSupport::SecureRandom.hex(64)
   end
 end
+
+MockRecord = Struct.new(:key)
