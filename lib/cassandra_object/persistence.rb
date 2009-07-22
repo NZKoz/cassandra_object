@@ -3,14 +3,21 @@ module CassandraObject
     extend ActiveSupport::Concern
     
     module ClassMethods
-      def get(key)
-        # Can't use constructor for both 'fetch' and 'new'
-        # take approach from AR.
-        attributes = connection.get(column_family, key)
-        if attributes.empty?
-          nil
-        else
-          instantiate(key, attributes)
+      def get(key, options = {})
+        multi_get([key], options).values.first
+      end
+
+      def multi_get(keys, options = {})
+        # TODO support :quorum or whatever
+        attribute_results = connection.multi_get(column_family, keys)
+
+        attribute_results.inject(ActiveSupport::OrderedHash.new) do |memo, (key, attributes)|
+          memo[key] = if attributes.empty?
+            nil
+          else
+            instantiate(key, attributes)
+          end
+          memo
         end
       end
 

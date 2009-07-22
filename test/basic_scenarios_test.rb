@@ -28,4 +28,12 @@ class BasicScenariosTest < CassandraObjectTestCase
   test "should have a schema version of 0" do
     assert_equal 0, @customer.schema_version
   end
+
+  test "multiget" do
+    custs = Customer.multi_get([@customer_key, "This is not a key either"])
+    customer, nothing = custs.values
+
+    assert_equal @customer, customer
+    assert_nil nothing
+  end
 end
