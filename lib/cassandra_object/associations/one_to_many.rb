@@ -9,9 +9,16 @@ module CassandraObject
       define_methods!
     end
     
+    # TODO needs :limit option here to be even remotely useful
     def find(owner)
-      res = connection.get(column_family, owner.key, @association_name)
-      res.keys.map {|key| target_class.get(key) }
+      keys = connection.get(column_family, owner.key, @association_name).keys
+      results = target_class.multi_get(keys)
+      results.map do |(key, result)|
+        if result.nil? # TODO need quorum stuff before nuking
+          connection.remove(column_family, owner.key, @association_name, key)
+        end
+        result
+      end.compact
     end
     
     def add(owner, record, set_inverse = true)
