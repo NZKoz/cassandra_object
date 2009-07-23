@@ -1,16 +1,12 @@
-if ENV["CASSANDRA_REQUIRED"]
+ENV['CASSANDRA'] ||= "/usr/local/cassandra/bin/cassandra"
 
-  CASSANDRA_BIN = File.expand_path(ENV['CASSANDRA'] || "../cassandra-r789419/bin/cassandra")
-  CASSANDRA_CONF = File.expand_path(File.join(File.dirname(__FILE__), 'config'))
-  TMP_DIR = File.join(File.dirname(__FILE__), '..', 'tmp')
+if ENV['CASSANDRA_REQUIRED']
+  tmp = File.expand_path(File.join(File.dirname(__FILE__), '..', 'tmp'))
+  config = File.expand_path(File.join(File.dirname(__FILE__), 'config'))
 
   $pid = fork {
-    Dir.chdir(TMP_DIR)
-    exec "JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/1.6/Home \
-      PATH=/System/Library/Frameworks/JavaVM.framework/Versions/1.6/Home/bin:$PATH \
-      CASSANDRA_CONF=#{CASSANDRA_CONF} \
-      CASSANDRA_INCLUDE=#{CASSANDRA_CONF}/cassandra.in.sh \
-      #{CASSANDRA_BIN} -f"
+    Dir.chdir(tmp)
+    puts "CASSANDRA_INCLUDE=#{config}/cassandra.in.sh #{ENV['CASSANDRA']} -f"
   }
 
   # Wait for cassandra to boot
@@ -21,7 +17,6 @@ puts "Connecting..."
 CassandraObject::Base.establish_connection "CassandraObject"
 
 if defined?($pid)
-
   at_exit do
     puts "Shutting down Cassandra..."
     Process.kill('INT', $pid)

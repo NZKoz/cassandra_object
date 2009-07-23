@@ -29,14 +29,39 @@
          There is an implicit table named 'system' for Cassandra internals.
     -->
     <Tables>
+      <Table Name="Twitter">
+          <ColumnFamily ColumnSort="Name"  Name="Users" />
+          <ColumnFamily ColumnSort="Name"  Name="UserAudits" />
+          <ColumnFamily ColumnType="Super" Name="UserRelationships" />
+          <ColumnFamily ColumnSort="Time"  Name="Usernames" />
+          <ColumnFamily ColumnSort="Time"  Name="Statuses" />
+          <ColumnFamily ColumnSort="Name"  Name="StatusAudits" />
+          <ColumnFamily ColumnType="Super" Name="StatusRelationships" />  
+      </Table>
+
+      <Table Name="Multiblog">      
+        <ColumnFamily ColumnSort="Time" Name="Blogs"/>
+        <ColumnFamily ColumnSort="Time" Name="Comments"/>
+      </Table>
+      
+      <Table Name="KozSandra">
+        <ColumnFamily ColumnSort="Name"  Name="Customers" />
+        <ColumnFamily ColumnType="Super" Name="CustomerRelationships" />
+        <ColumnFamily ColumnType="Super" Name="CustomerIndexes" />
+        <ColumnFamily ColumnSort="Name"  Name="Invoices" />
+        <ColumnFamily ColumnType="Super" Name="InvoiceIndexes" />
+        <ColumnFamily ColumnType="Super" Name="InvoiceRelationships" />
+        <ColumnFamily ColumnSort="Name"  Name="InvoicesByNumber" />
+      </Table>
+
       <Table Name="CassandraObject">
-        <ColumnFamily ColumnSort="Name" Name="Customers" />
-        <ColumnFamily ColumnType="Super" ColumnSort="Name" Name="CustomerRelationships" />
-        <ColumnFamily ColumnType="Super" ColumnSort="Name" Name="CustomerIndexes" />
-        <ColumnFamily ColumnSort="Name" Name="Invoices" />
-        <ColumnFamily ColumnType="Super" ColumnSort="Name" Name="InvoiceIndexes" />
-        <ColumnFamily ColumnType="Super" ColumnSort="Name" Name="InvoiceRelationships" />
-        <ColumnFamily ColumnSort="Name" Name="InvoicesByNumber" />
+        <ColumnFamily ColumnSort="Name"  Name="Customers" />
+        <ColumnFamily ColumnType="Super" Name="CustomerRelationships" />
+        <ColumnFamily ColumnType="Super" Name="CustomerIndexes" />
+        <ColumnFamily ColumnSort="Name"  Name="Invoices" />
+        <ColumnFamily ColumnType="Super" Name="InvoiceIndexes" />
+        <ColumnFamily ColumnType="Super" Name="InvoiceRelationships" />
+        <ColumnFamily ColumnSort="Name"  Name="InvoicesByNumber" />
       </Table>
     </Tables>
 
