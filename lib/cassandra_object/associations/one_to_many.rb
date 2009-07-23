@@ -9,16 +9,30 @@ module CassandraObject
       define_methods!
     end
     
-    # TODO needs :limit option here to be even remotely useful
-    def find(owner)
-      keys = connection.get(column_family, owner.key, @association_name).keys
+    def find(owner, options = {})
+      limit = options[:limit] || 100
+      keys = connection.get(column_family, owner.key, @association_name, nil, limit).keys
       results = target_class.multi_get(keys)
-      results.map do |(key, result)|
-        if result.nil? # TODO need quorum stuff before nuking
-          connection.remove(column_family, owner.key, @association_name, key)
+
+      missing_keys = []
+      results.each do |(key, result)|
+        if result.nil?
+          missing_keys << key
         end
-        result
-      end.compact
+      end
+
+      quorum_results = target_class.multi_get(missing_keys, :quorum=>true)
+
+      # We may still be missing records after this
+      # FIXME - needs limit/start
+      quorum_results.map do |(key, result)|
+        if result.nil?
+          connection.remove(column_family, owner.key, @association_name, key)
+        else
+          results[key] = result
+        end
+      end
+      results.values.compact
     end
     
     def add(owner, record, set_inverse = true)
@@ -85,6 +99,10 @@ module CassandraObject
       end
     end
     
+    def all(options = {})
+      @association.find(@owner, options)
+    end
+
     def target
       @target ||= begin
         @loaded = true

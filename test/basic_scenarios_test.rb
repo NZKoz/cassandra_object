@@ -36,4 +36,11 @@ class BasicScenariosTest < CassandraObjectTestCase
     assert_equal @customer, customer
     assert_nil nothing
   end
+
+  test "creating a new record starts with the right version" do
+    @invoice  = Invoice.create :number=>Time.now.to_i, :total=>Time.now.to_f
+
+    raw_result = Invoice.connection.get("Invoices", @invoice.key)
+    assert_equal Invoice.current_schema_version, raw_result["schema_version"]
+  end
 end
