@@ -57,7 +57,6 @@ module CassandraObject
         returning allocate do |object|
           object.instance_variable_set("@key", key)
           object.instance_variable_set("@attributes", attributes.with_indifferent_access)
-          object.instance_variable_set("@changed_attribute_names", Set.new)
         end
       end
     end

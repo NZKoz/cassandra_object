@@ -111,8 +111,6 @@ module CassandraObject
         if ma = self.class.model_attributes[name]
           value = ma.check_value!(value)
         end
-          
-        @changed_attribute_names << name
         @attributes[name] = value
       end
 
@@ -124,22 +122,9 @@ module CassandraObject
         end
       end
 
-      def changed_attributes
-        @changed_attribute_names.inject({}) do |memo, name|
-          memo[name] = send(name)
-          memo
-        end
-      end
-
       def attributes=(attributes)
         attributes.each do |(name, value)|
           send("#{name}=", value)
-        end
-      end
-      
-      def attributes_changed!(attributes)
-        attributes.each do |attr_name|
-          @changed_attribute_names << attr_name.to_s
         end
       end
     end

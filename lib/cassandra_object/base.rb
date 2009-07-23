@@ -1,6 +1,7 @@
 require 'cassandra_client'
 require 'set'
 require 'cassandra_object/attributes'
+require 'cassandra_object/dirty'
 require 'cassandra_object/persistence'
 require 'cassandra_object/validation'
 require 'cassandra_object/callbacks'
@@ -33,7 +34,7 @@ module CassandraObject
     include Attributes
     include Persistence
     include Indexes
-    
+    include Dirty
     
 
     include Validation
@@ -51,7 +52,6 @@ module CassandraObject
     def initialize(attributes={})
       @key = attributes.delete(:key)
       @new_record = true
-      @changed_attribute_names = Set.new
       @attributes = {}.with_indifferent_access
       self.attributes = attributes
     end
