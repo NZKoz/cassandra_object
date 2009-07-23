@@ -52,7 +52,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
                  association_keys_in_cassandra
 
     assert_equal [@third_invoice, @second_invoice], @customer.invoices.all(:limit=>2)
-    assert_equal [@third_invoice, @second_invoice, @invoice], @customer.invoices.all(:limit=>2)
+    assert_equal [@third_invoice, @second_invoice, @invoice], @customer.invoices.all(:limit=>3)
     
   end
 
