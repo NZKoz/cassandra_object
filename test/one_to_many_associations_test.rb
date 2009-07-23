@@ -8,7 +8,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
                                 :date_of_birth => "1980-08-15"
     assert @customer.valid?, @customer.errors                            
     
-    @invoice  = Invoice.create :number=>Time.now.to_i, :total=>Time.now.to_f
+    @invoice  = mock_invoice
     assert @invoice.valid?, @invoice.errors
     
     @customer.invoices << @invoice
@@ -38,12 +38,12 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
   test "read-repair with a limit" do
     
     # Now add a second legit invoice
-    @second_invoice = Invoice.create :number=>Time.now.to_i, :total=>Time.now.to_f
+    @second_invoice = mock_invoice
     @customer.invoices << @second_invoice
 
     add_junk_key
 
-    @third_invoice = Invoice.create  :number=>Time.now.to_i, :total=>Time.now.to_f
+    @third_invoice = mock_invoice
     @customer.invoices << @third_invoice
     
     #

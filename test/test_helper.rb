@@ -18,4 +18,8 @@ class CassandraObjectTestCase < ActiveSupport::TestCase
   def teardown
     CassandraObject::Base.connection.clear_keyspace!
   end
+
+  def mock_invoice
+    Invoice.create :number=>Time.now.to_i*(rand(5)), :total=>Time.now.to_f
+  end
 end
