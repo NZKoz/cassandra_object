@@ -10,29 +10,41 @@ module CassandraObject
     end
     
     def find(owner, options = {})
-      limit = options[:limit] || 100
-      keys = connection.get(column_family, owner.key, @association_name, nil, limit).keys
+      limit        = options[:limit] || 100
+      keys         = connection.get(column_family, owner.key, @association_name, nil, limit).keys
+      out_of_keys  = keys.size < limit
+      missing_keys = []
+
       results = target_class.multi_get(keys)
 
-      missing_keys = []
       results.each do |(key, result)|
         if result.nil?
           missing_keys << key
         end
       end
 
-      quorum_results = target_class.multi_get(missing_keys, :quorum=>true)
-
-      # We may still be missing records after this
-      # FIXME - needs limit/start
-      quorum_results.map do |(key, result)|
-        if result.nil?
-          connection.remove(column_family, owner.key, @association_name, key)
-        else
-          results[key] = result
+      unless missing_keys.empty?
+        target_class.multi_get(missing_keys, :quorum=>true).each do |(key, result)|
+          if result.nil?
+            connection.remove(column_family, owner.key, @association_name, key)
+            results.delete(key)
+          else
+            results[key] = result
+          end
         end
       end
-      results.values.compact
+
+      # We've trimmed out the read-repair stuff, now check if we've grabbed enough or the max
+      if results.size == limit || out_of_keys
+        results.values
+      else
+        # We have to fetch more, pass start and limit on down and recurse
+        # FIXME this isn't erlang, this should probably iterate instead
+        number_remaining_to_fetch = limit - results.size
+        recursive_options = options.merge(:limit=>number_remaining_to_fetch,
+                                          :start=>keys.last)
+        results.values + find(owner, recursive_options)
+      end
     end
     
     def add(owner, record, set_inverse = true)
