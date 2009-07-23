@@ -7,9 +7,21 @@ module CassandraObject
         multi_get([key], options).values.first
       end
 
+      DEFAULT_MULTI_GET_OPTIONS = {
+        :quorum=>false,
+        :limit=>100
+      }
+
       def multi_get(keys, options = {})
-        # TODO support :quorum or whatever
-        attribute_results = connection.multi_get(column_family, keys)
+        options = DEFAULT_MULTI_GET_OPTIONS.merge(options)
+
+        if options[:quorum]
+          consistency = CassandraClient::Consistency::QUORUM
+        else
+          consistency = CassandraClient::Consistency::WEAK
+        end
+
+        attribute_results = connection.multi_get(column_family, keys, nil, nil, options[:limit], consistency)
 
         attribute_results.inject(ActiveSupport::OrderedHash.new) do |memo, (key, attributes)|
           memo[key] = if attributes.empty?
