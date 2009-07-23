@@ -85,6 +85,10 @@ module CassandraObject
       end
     end
     
+    def all(options = {})
+      @association.find(@owner, options)
+    end
+
     def target
       @target ||= begin
         @loaded = true
