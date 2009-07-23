@@ -23,19 +23,47 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
   end
   
   test "handles read-repair" do
+    add_junk_key
+
+    assert_equal ["SomethingStupid", @invoice.key], association_keys_in_cassandra
+
+    assert_equal [@invoice], @customer.invoices.to_a
+
+
+    assert_equal [@invoice.key], association_keys_in_cassandra
+
+
+  end
+
+  test "read-repair with a limit" do
+    
+    # Now add a second legit invoice
+    @second_invoice = Invoice.create :number=>Time.now.to_i, :total=>Time.now.to_f
+    @customer.invoices << @second_invoice
+
+    add_junk_key
+
+    @third_invoice = Invoice.create  :number=>Time.now.to_i, :total=>Time.now.to_f
+    @customer.invoices << @third_invoice
+    
+    #
+    
+    assert_equal [@third_invoice.key,"SomethingStupid", @second_invoice.key,  @invoice.key],
+                 association_keys_in_cassandra
+
+    assert_equal [@third_invoice, @second_invoice], @customer.invoices.all(:limit=>2)
+    
+  end
+
+  def add_junk_key
     invoices_association = Customer.associations[:invoices]
     invoices_association.add(@customer, MockRecord.new("SomethingStupid"))
 
-    keys_in_cassandra = Customer.connection.get(invoices_association.column_family, @customer.key, "invoices").keys
-    
-    assert_equal ["SomethingStupid", @invoice.key], keys_in_cassandra
-    
-    invoices = @customer.invoices.to_a
-    assert_equal [@invoice], invoices
-    
-    keys_in_cassandra = Customer.connection.get(invoices_association.column_family, @customer.key, "invoices").keys
-    
-    assert_equal [@invoice.key], keys_in_cassandra
   end
+
+  def association_keys_in_cassandra
+    Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key, "invoices").keys
+  end
+
   
 end
