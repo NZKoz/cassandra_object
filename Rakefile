@@ -8,7 +8,10 @@ Rake::TestTask.new(:test) do |t|
   t.verbose = true
 end
 
-
-task :default=>[:test] do
+task :cleanup do
   CassandraObject::Base.connection.clear_keyspace!
 end
+
+task :default=>[:test, :cleanup] do
+end
+
