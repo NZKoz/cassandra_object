@@ -10,10 +10,22 @@ module CassandraObject
     end
     
     def find(owner, options = {})
+      start        = options[:start]
       limit        = options[:limit] || 100
-      keys         = connection.get(column_family, owner.key, @association_name, nil, limit).keys
-      out_of_keys  = keys.size < limit
       missing_keys = []
+
+      if start
+        limit += 1
+      end
+
+      # FIXME - start not supported in cassandra_client yet
+      keys = connection.get(column_family, owner.key, @association_name, nil, limit).keys
+
+      if start
+        keys.delete(start)
+      end
+
+      out_of_keys  = keys.size < limit
 
       results = target_class.multi_get(keys)
 
