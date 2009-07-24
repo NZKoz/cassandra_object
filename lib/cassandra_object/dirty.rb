@@ -16,13 +16,13 @@ module CassandraObject
 
     def attributes_changed!(attributes)
       attributes.each do |attr_name|
-        changed_attributes[name] = send(attr_name)
+        changed_attributes[attr_name] = send(attr_name)
       end
     end
 
     private
       def changed_attributes
-        @changed_attributes ||= {}
+        @changed_attributes ||= {}.with_indifferent_access
       end
 
       def write_attribute(name, value)

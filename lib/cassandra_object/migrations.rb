@@ -32,7 +32,7 @@ module CassandraObject
       end
       
       def schema_version
-        Integer(@attributes[:schema_version] || current_schema_version)
+        Integer(@attributes[:schema_version] || self.class.current_schema_version)
       end
     end
     
