@@ -6,12 +6,14 @@
 * triggers (primarily for updating relationships) #DONE
 * domain validations #DONE (needs more in AMo)
 * read-repair migrations (e.g. define update rules for when you read 
-  an unmigrated record and have to convert it...might require a schema version column) #DONE by not associations yet.
+  an unmigrated record and have to convert it...might require a schema version column) #DONE
+
 
 # storage-y things...less important
 
 * type casting (esp. dates) # DONE but Needs to build on something in AMo
 * optional strict or relaxed field lists # DONE (.attributes returns other attributes ditto read_attributes)
 * serialization (should probably steal or mask the serialization in the current client)
+
 * some kind of crap to let you do column_family compound key indexes (cluster-wide) 
   the same way as supercolumn indexes
