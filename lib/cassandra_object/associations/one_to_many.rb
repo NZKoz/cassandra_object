@@ -10,7 +10,7 @@ module CassandraObject
     end
     
     def find(owner, options = {})
-      start        = options[:start]
+      start        = options[:start_after]
       limit        = options[:limit] || 100
       missing_keys = []
 
@@ -54,7 +54,7 @@ module CassandraObject
         # FIXME this isn't erlang, this should probably iterate instead
         number_remaining_to_fetch = limit - results.size
         recursive_options = options.merge(:limit=>number_remaining_to_fetch,
-                                          :start=>keys.last)
+                                          :start_after=>keys.last)
         results.values + find(owner, recursive_options)
       end
     end
