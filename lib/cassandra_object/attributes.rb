@@ -103,7 +103,7 @@ module CassandraObject
         elsif @attributes.include?(name) || model_attributes[name]
           read_attribute(name)
         else
-          super(name, *args)
+          super
         end
       end
 

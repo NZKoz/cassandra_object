@@ -32,6 +32,10 @@ module CassandraObject
           memo
         end
       end
+      
+      def remove(key)
+        connection.remove(column_family, key)
+      end
 
       def all(keyrange = ''..'', options = {})
         connection.get_key_range(column_family, keyrange, options[:limit] || 100).map {|key| get(key) }
@@ -78,6 +82,12 @@ module CassandraObject
 
       def new_record?
         @new_record || false
+      end
+      
+      def destroy
+        run_callbacks :before_destroy
+        self.class.remove(key)
+        run_callbacks :after_destroy
       end
     end
   end

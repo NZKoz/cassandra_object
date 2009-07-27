@@ -18,6 +18,11 @@ module CassandraObject
           associations[association_name] = OneToManyAssociation.new(association_name, self, options)
         end
       end
+      
+      def remove(key)
+        connection.remove("#{name}Relationships", key)
+        super
+      end
     end
   end
 end

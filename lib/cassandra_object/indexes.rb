@@ -23,6 +23,10 @@ module CassandraObject
         @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {'key'=>record.key})
       end
       
+      def remove(record)
+        @model_class.connection.remove(column_family, record.send(@attribute_name).to_s)
+      end
+      
       def column_family
         @model_class.column_family + "By" + @attribute_name.to_s.camelize 
       end
@@ -36,17 +40,22 @@ module CassandraObject
       
       def find(attribute_value)
         # first find the keys
-        res = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name)
+        res = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name.to_s)
         # then pass to get
         res.keys.map {|key| @model_class.get(key) }
       end
       
       def write(record)
-        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.key=>nil}})
+        args = [column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.key=>nil}}]
+        @model_class.connection.insert(*args)
+      end
+      
+      def remove(record)
+        @model_class.connection.remove(column_family, record.send(@attribute_name).to_s, @attribute_name.to_s, record.key)
       end
       
       def column_family
-        @model_class.to_s + "Indexes"
+        @model_class.column_family + "By" + @attribute_name.to_s.camelize 
       end
     end
     
@@ -64,6 +73,9 @@ module CassandraObject
               self.indexes[:#{attribute_name}].write(record)
             end
               
+            after_save do |record|
+              record.class.indexes[:#{attribute_name}].remove(record)
+            end
           eom
         else
           self.indexes[attribute_name] = Index.new(attribute_name, self)
@@ -76,6 +88,9 @@ module CassandraObject
               record.class.indexes[:#{attribute_name}].write(record)
             end
               
+            after_save do |record|
+              record.class.indexes[:#{attribute_name}].remove(record)
+            end
           eom
         end
       end

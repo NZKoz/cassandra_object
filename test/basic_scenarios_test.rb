@@ -43,4 +43,21 @@ class BasicScenariosTest < CassandraObjectTestCase
     raw_result = Invoice.connection.get("Invoices", @invoice.key)
     assert_equal Invoice.current_schema_version, raw_result["schema_version"]
   end
+  
+  context "destroying a customer with invoices" do
+    setup do
+      @invoice = mock_invoice
+      @customer.invoices << @invoice
+      
+      @customer.destroy
+    end
+    
+    should "Have removed the customer" do
+      assert Customer.connection.get("Customers", @customer.key).empty?
+    end
+    
+    should "Have removed the associations too" do
+      assert_equal Hash.new, Customer.connection.get("CustomerRelationships", @customer.key)
+    end
+  end
 end
