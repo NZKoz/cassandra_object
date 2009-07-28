@@ -19,7 +19,7 @@ class BasicScenariosTest < CassandraObjectTestCase
     other_customer = Customer.get(@customer_key)
 
     assert_equal @customer, other_customer
-
+    
     assert_equal "Michael", other_customer.first_name
     assert_equal "Koziarski", other_customer.last_name
     # FIXME

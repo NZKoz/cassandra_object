@@ -16,7 +16,11 @@ module CassandraObject
         # first find the key value
         key = @model_class.connection.get(column_family, attribute_value.to_s, 'key')
         # then pass to get
-        @model_class.get(key)
+        if key
+          @model_class.get(key.to_s)
+        else
+          nil
+        end
       end
       
       def write(record)
@@ -38,16 +42,16 @@ module CassandraObject
         @model_class    = model_class
       end
       
-      def find(attribute_value)
+      def find(attribute_value, options = {})
         # first find the keys
-        res = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name.to_s)
+        res = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name.to_s, nil, options[:limit] || 100)
+
         # then pass to get
-        res.keys.map {|key| @model_class.get(key) }
+        @model_class.multi_get(res.keys).values
       end
       
       def write(record)
-        args = [column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.key=>nil}}]
-        @model_class.connection.insert(*args)
+        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.key=>nil}})
       end
       
       def remove(record)
@@ -73,22 +77,22 @@ module CassandraObject
               self.indexes[:#{attribute_name}].write(record)
             end
               
-            after_save do |record|
+            after_destroy do |record|
               record.class.indexes[:#{attribute_name}].remove(record)
             end
           eom
         else
           self.indexes[attribute_name] = Index.new(attribute_name, self)
           class_eval <<-eom
-            def self.find_all_by_#{attribute_name}(value)
-              self.indexes[:#{attribute_name}].find(value)
+            def self.find_all_by_#{attribute_name}(value, options = {})
+              self.indexes[:#{attribute_name}].find(value, options)
             end
             
             after_save do |record|
               record.class.indexes[:#{attribute_name}].write(record)
             end
               
-            after_save do |record|
+            after_destroy do |record|
               record.class.indexes[:#{attribute_name}].remove(record)
             end
           eom
