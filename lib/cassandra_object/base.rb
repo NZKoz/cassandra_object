@@ -53,6 +53,7 @@ module CassandraObject
       @key = attributes.delete(:key)
       @new_record = true
       @attributes = {}.with_indifferent_access
+      @changed_attribute_names = Set.new
       self.attributes = attributes
     end
   end

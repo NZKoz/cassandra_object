@@ -2,43 +2,41 @@ module CassandraObject
   module Dirty
     extend ActiveSupport::Concern
 
-    def changed?
-      !changed_attributes.empty?
+    included do
+      attr_reader :changed_attribute_names
     end
 
-    def changed
-      changed_attributes.keys
-    end
-
-    def save
-      super.tap { changed_attributes.clear }
-    end
-
-    def attributes_changed!(attributes)
-      attributes.each do |attr_name|
-        changed_attributes[attr_name] = send(attr_name)
+    module InstanceMethods
+      def changed?
+        !changed_attribute_names.empty?
       end
-    end
 
-    private
+      def changed
+        changed_attribute_names
+      end
+
+      def save
+        super.tap { changed_attribute_names.clear }
+      end
+
+      def attributes_changed!(attributes)
+        attributes.each do |attr_name|
+          changed_attribute_names << attr_name
+        end
+      end
+
       def changed_attributes
-        @changed_attributes ||= {}.with_indifferent_access
+        changed_attribute_names.inject(Hash.new) do |memo, name|
+          memo[name.to_s] = read_attribute(name)
+          memo
+        end
       end
 
       def write_attribute(name, value)
-        if changed_attributes.include?(name)
-          old = changed_attributes[name]
-          changed_attributes.delete(name) unless attribute_changed?(name, old, value)
-        else
-          old = read_attribute(name)
-          changed_attributes[name] = old if attribute_changed?(name, old, value)
-        end
-
+        @changed_attribute_names << name
         super
       end
-
-      def attribute_changed?(name, old, value)
-        old != self.class.model_attributes[name].type_cast(value)
-      end
+    end
   end
 end
+

@@ -19,6 +19,11 @@ class BasicScenariosTest < CassandraObjectTestCase
     other_customer = Customer.get(@customer_key)
 
     assert_equal @customer, other_customer
+
+    assert_equal "Michael", other_customer.first_name
+    assert_equal "Koziarski", other_customer.last_name
+    # FIXME
+    # assert_equal Date.parse("1980-08-15"), other_customer.date_of_birth
   end
   
   test "date_of_birth is a date" do
