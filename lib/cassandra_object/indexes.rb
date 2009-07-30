@@ -19,6 +19,7 @@ module CassandraObject
         if key
           @model_class.get(key.to_s)
         else
+          @model_class.connection.remove(column_family, attribute_value.to_s)
           nil
         end
       end
@@ -43,11 +44,8 @@ module CassandraObject
       end
       
       def find(attribute_value, options = {})
-        # first find the keys
-        res = @model_class.connection.get(column_family, attribute_value.to_s, @attribute_name.to_s, nil, options[:limit] || 100)
-
-        # then pass to get
-        @model_class.multi_get(res.keys).values
+        cursor = CassandraObject::Cursor.new(@model_class, column_family, attribute_value.to_s, @attribute_name.to_s, :start_after=>options[:start_after])
+        cursor.find(options[:limit] || 100)
       end
       
       def write(record)
