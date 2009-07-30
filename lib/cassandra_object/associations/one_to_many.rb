@@ -10,53 +10,8 @@ module CassandraObject
     end
     
     def find(owner, options = {})
-      start        = options[:start_after]
-      limit        = options[:limit] || 100
-      missing_keys = []
-
-      if start
-        limit += 1
-      end
-
-      # FIXME - start not supported in cassandra_client yet
-      keys = connection.get(column_family, owner.key, @association_name, nil, limit).keys
-
-      if start
-        keys.delete(start)
-      end
-
-      out_of_keys  = keys.size < limit
-
-      results = target_class.multi_get(keys)
-
-      results.each do |(key, result)|
-        if result.nil?
-          missing_keys << key
-        end
-      end
-
-      unless missing_keys.empty?
-        target_class.multi_get(missing_keys, :quorum=>true).each do |(key, result)|
-          if result.nil?
-            connection.remove(column_family, owner.key, @association_name, key)
-            results.delete(key)
-          else
-            results[key] = result
-          end
-        end
-      end
-
-      # We've trimmed out the read-repair stuff, now check if we've grabbed enough or the max
-      if results.size == limit || out_of_keys
-        results.values
-      else
-        # We have to fetch more, pass start and limit on down and recurse
-        # FIXME this isn't erlang, this should probably iterate instead
-        number_remaining_to_fetch = limit - results.size
-        recursive_options = options.merge(:limit=>number_remaining_to_fetch,
-                                          :start_after=>keys.last)
-        results.values + find(owner, recursive_options)
-      end
+      cursor = CassandraObject::Cursor.new(target_class, column_family, owner.key, @association_name, :start_after=>options[:start_after])
+      cursor.find(options[:limit] || 100)
     end
     
     def add(owner, record, set_inverse = true)

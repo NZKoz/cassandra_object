@@ -10,6 +10,7 @@ require 'cassandra_object/indexes'
 require 'cassandra_object/serialization'
 require 'cassandra_object/associations'
 require 'cassandra_object/migrations'
+require 'cassandra_object/cursor'
 
 module CassandraObject
   class Base
