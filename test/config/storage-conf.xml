@@ -29,146 +29,179 @@
          There is an implicit table named 'system' for Cassandra internals.
     -->
     <Tables>
+      
       <Table Name="Twitter">
-          <ColumnFamily ColumnSort="Name"  Name="Users" />
-          <ColumnFamily ColumnSort="Name"  Name="UserAudits" />
-          <ColumnFamily ColumnType="Super" Name="UserRelationships" />
-          <ColumnFamily ColumnSort="Time"  Name="Usernames" />
-          <ColumnFamily ColumnSort="Time"  Name="Statuses" />
-          <ColumnFamily ColumnSort="Name"  Name="StatusAudits" />
-          <ColumnFamily ColumnType="Super" Name="StatusRelationships" />  
+          <KeysCachedFraction>0.01</KeysCachedFraction>
+          <ColumnFamily CompareWith="UTF8Type" Name="Users" />
+          <ColumnFamily CompareWith="UTF8Type" Name="UserAudits" />
+          <ColumnFamily CompareWith="UTF8Type" CompareSubcolumnsWith="UUIDType" ColumnType="Super" Name="UserRelationships" />
+          <ColumnFamily CompareWith="UTF8Type" Name="Usernames" />
+          <ColumnFamily CompareWith="UTF8Type" Name="Statuses" />
+          <ColumnFamily CompareWith="UTF8Type" Name="StatusAudits" />
+          <ColumnFamily CompareWith="UTF8Type" CompareSubcolumnsWith="LongType" ColumnType="Super" Name="StatusRelationships" />  
       </Table>
 
       <Table Name="Multiblog">      
-        <ColumnFamily ColumnSort="Time" Name="Blogs"/>
-        <ColumnFamily ColumnSort="Time" Name="Comments"/>
+        <KeysCachedFraction>0.01</KeysCachedFraction>
+        <ColumnFamily CompareWith="UTF8Type" Name="Blogs"/>
+        <ColumnFamily CompareWith="UTF8Type" Name="Comments"/>
       </Table>
       
-      <Table Name="KozSandra">
-        <ColumnFamily ColumnSort="Name"  Name="Customers" />
-        <ColumnFamily ColumnType="Super" Name="CustomerRelationships" />
-        <ColumnFamily ColumnType="Super" Name="CustomerIndexes" />
-        <ColumnFamily ColumnSort="Name"  Name="Invoices" />
-        <ColumnFamily ColumnType="Super" Name="InvoiceIndexes" />
-        <ColumnFamily ColumnType="Super" Name="InvoiceRelationships" />
-        <ColumnFamily ColumnSort="Name"  Name="InvoicesByNumber" />
-      </Table>
-
       <Table Name="CassandraObject">
-        <ColumnFamily ColumnSort="Name"  Name="Customers" />
-        <ColumnFamily ColumnType="Super" Name="CustomerRelationships" />
-        <ColumnFamily ColumnType="Super" Name="CustomerIndexes" />
-        <ColumnFamily ColumnSort="Name"  Name="Invoices" />
-        <ColumnFamily ColumnType="Super" Name="InvoiceIndexes" />
-        <ColumnFamily ColumnType="Super" Name="InvoiceRelationships" />
-        <ColumnFamily ColumnSort="Name"  Name="InvoicesByNumber" />
+        <KeysCachedFraction>0.01</KeysCachedFraction>
+        <ColumnFamily CompareWith="UTF8Type" Name="Customers" />
+        <ColumnFamily CompareWith="UTF8Type" CompareSubcolumnsWith="UUIDType" ColumnType="Super" Name="CustomerRelationships" />
+        <ColumnFamily CompareWith="UTF8Type" CompareSubcolumnsWith="UUIDType" ColumnType="Super" Name="CustomersByLastName" />
+        <ColumnFamily CompareWith="UTF8Type" Name="Invoices" />
+      	<ColumnFamily CompareWith="UTF8Type" CompareSubcolumnsWith="UUIDType" ColumnType="Super" Name="InvoiceRelationships" />
+      	<ColumnFamily CompareWith="UTF8Type" Name="InvoicesByNumber" />
       </Table>
     </Tables>
 
-    <!-- Partitioner: any IPartitioner may be used, including your own
-         as long as it is on the classpath.  Out of the box,
-         Cassandra provides
-         org.apache.cassandra.dht.RandomPartitioner and
-         org.apache.cassandra.dht.OrderPreservingPartitioner.
-         Range queries require using OrderPreservingPartitioner or a subclass.
+     <!-- Partitioner: any IPartitioner may be used, including your own
+          as long as it is on the classpath.  Out of the box,
+          Cassandra provides
+          org.apache.cassandra.dht.RandomPartitioner and
+          org.apache.cassandra.dht.OrderPreservingPartitioner.
+          Range queries require using OrderPreservingPartitioner or a subclass.
 
-         Achtung!  Changing this parameter requires wiping your data directories,
-         since the partitioner can modify the sstable on-disk format.
-    -->
-    <Partitioner>org.apache.cassandra.dht.OrderPreservingPartitioner</Partitioner>
+          Achtung!  Changing this parameter requires wiping your data directories,
+          since the partitioner can modify the sstable on-disk format.
+     -->
+     <Partitioner>org.apache.cassandra.dht.OrderPreservingPartitioner</Partitioner>
 
-    <!-- If you are using the OrderPreservingPartitioner and you know your key
-         distribution, you can specify the token for this node to use.
-         (Keys are sent to the node with the "closest" token, so distributing
-         your tokens equally along the key distribution space will spread
-         keys evenly across your cluster.)  This setting is only checked the
-         first time a node is started. 
+     <!-- If you are using the OrderPreservingPartitioner and you know your key
+          distribution, you can specify the token for this node to use.
+          (Keys are sent to the node with the "closest" token, so distributing
+          your tokens equally along the key distribution space will spread
+          keys evenly across your cluster.)  This setting is only checked the
+          first time a node is started. 
 
-         This can also be useful with RandomPartitioner to force equal
-         spacing of tokens around the hash space, especially for
-         clusters with a small number of nodes. -->
-    <InitialToken></InitialToken>
+          This can also be useful with RandomPartitioner to force equal
+          spacing of tokens around the hash space, especially for
+          clusters with a small number of nodes. -->
+     <InitialToken></InitialToken>
 
-    <!-- RackAware: Setting this to true instructs Cassandra to try and place the replicas in
-         a different rack in the same datacenter and one in a different datacenter
-    -->
-    <RackAware>false</RackAware>
+     <!-- RackAware: Setting this to true instructs Cassandra to try and place the replicas in
+          a different rack in the same datacenter and one in a different datacenter
+     -->
+     <RackAware>false</RackAware>
 
-    <!-- Number of replicas of the data-->
-    <ReplicationFactor>1</ReplicationFactor>
+     <!-- Number of replicas of the data-->
+     <ReplicationFactor>1</ReplicationFactor>
 
-    <!-- Directories: Specify where Cassandra should store different data on disk
-         Keep the data disks and the CommitLog disks separate for best performance
-    -->
-    <CommitLogDirectory>data/commitlog</CommitLogDirectory>
-    <DataFileDirectories>
-        <DataFileDirectory>data/data</DataFileDirectory>
-    </DataFileDirectories>
-    <CalloutLocation>data/callouts</CalloutLocation>
-    <BootstrapFileDirectory>data/bootstrap</BootstrapFileDirectory>
-    <StagingFileDirectory>data/staging</StagingFileDirectory>
-
-
-    <!-- Add names of hosts that are deemed contact points. Cassandra nodes use
-         this list of hosts to find each other and learn the topology of the ring.
-    -->
-    <Seeds>
-        <Seed>127.0.0.1</Seed>
-    </Seeds>
-
-    <!-- Miscellaneous -->
-    <RpcTimeoutInMillis>5000</RpcTimeoutInMillis>
-    <CommitLogRotationThresholdInMB>128</CommitLogRotationThresholdInMB>
-
-    <!-- Hosts and Ports -->
-    <ListenAddress>localhost</ListenAddress>
-    <StoragePort>7000</StoragePort>
-    <ControlPort>7001</ControlPort>
-    <ThriftPort>9160</ThriftPort>
-    <HttpPort>7002</HttpPort>
+     <!-- Directories: Specify where Cassandra should store different data on disk
+          Keep the data disks and the CommitLog disks separate for best performance
+     -->
+     <CommitLogDirectory>data/commitlog</CommitLogDirectory>
+     <DataFileDirectories>
+         <DataFileDirectory>data/data</DataFileDirectory>
+     </DataFileDirectories>
+     <CalloutLocation>data/callouts</CalloutLocation>
+     <BootstrapFileDirectory>data/bootstrap</BootstrapFileDirectory>
+     <StagingFileDirectory>data/staging</StagingFileDirectory>
 
 
-    <!--======================================================================-->
-    <!-- Memory, Disk, and Performance                                        -->
-    <!--======================================================================-->
+     <!-- Add names of hosts that are deemed contact points. Cassandra nodes use
+          this list of hosts to find each other and learn the topology of the ring.
+     -->
+     <Seeds>
+         <Seed>127.0.0.1</Seed>
+     </Seeds>
 
-    <!-- Threshold for adding a column index in a row -->
-    <ColumnIndexSizeInKB>256</ColumnIndexSizeInKB>
+     <!-- Miscellaneous -->
 
-    <!--
-      The maximum amount of data to store in memory before flushing to
-      disk. Note: There is one memtable per column family, and this threshold
-      is based solely on the amount of data stored, not actual heap memory
-      usage (there is some overhead in indexing the columns).
-    -->
-    <MemtableSizeInMB>32</MemtableSizeInMB>
-
-    <!--
-      The maximum number of columns in millions to store in memory
-      before flushing to disk.  This is also a per-memtable setting.
-      Use with MemtableSizeInMB to tune memory usage.
-    -->
-    <MemtableObjectCountInMillions>0.02</MemtableObjectCountInMillions>
-
-    <!-- Time to wait before garbage-collection deletion markers.
-         Set this to a large enough value that you are confident
-         that the deletion marker will be propagated to all replicas
-         by the time this many seconds has elapsed, even in the
-         face of hardware failures.  The default value is ten days.
-    -->
-    <GCGraceSeconds>864000</GCGraceSeconds>
+     <!-- time to wait for a reply from other nodes before failing the command -->
+     <RpcTimeoutInMillis>5000</RpcTimeoutInMillis>
+     <!-- size to allow commitlog to grow to before creating a new segment -->
+     <CommitLogRotationThresholdInMB>128</CommitLogRotationThresholdInMB>
 
 
-    <!--======================================================================-->
-    <!-- OPTIONAL                                                             -->
-    <!--======================================================================-->
-    <!-- This final section contains configuration information for optional
-         and experimental features in Cassandra that are not yet fully functional.
-         Basic features in Cassandra should work fine without configuring this section.
-    -->
-    <ZookeeperAddress>127.0.0.1</ZookeeperAddress>
-    <MulticastChannel>230.0.0.1</MulticastChannel>
-    <GangliaServers>
-        <GangliaServer>127.0.0.1:12000</GangliaServer>
-    </GangliaServers>
+     <!-- Local hosts and ports -->
+
+     <!-- Address to bind to and tell other nodes to connect to.  
+          You _must_ change this if you want multiple nodes to be able
+          to communicate!  
+
+          Leaving it blank leaves it up to InetAddress.getLocalHost(). 
+          This will always do the Right Thing *if* the node is properly
+          configured (hostname, name resolution, etc), and the Right
+          Thing is to use the address associated with the hostname (it
+          might not be). -->
+     <ListenAddress>localhost</ListenAddress>
+     <!-- TCP port, for commands and data -->
+     <StoragePort>7000</StoragePort>
+     <!-- UDP port, for membership communications (gossip) -->
+     <ControlPort>7001</ControlPort>
+
+     <!-- The address to bind the Thrift RPC service to. Unlike 
+          ListenAddress above, you *can* specify 0.0.0.0 here if you want
+          Thrift to listen on all interfaces.
+
+          Leaving this blank has the same effect it does for ListenAddress,
+          (i.e. it will be based on the configured hostname of the node).
+     -->
+     <ThriftAddress>localhost</ThriftAddress>
+     <!-- Thrift RPC port (the port clients connect to). -->
+     <ThriftPort>9160</ThriftPort>
+
+
+     <!--======================================================================-->
+     <!-- Memory, Disk, and Performance                                        -->
+     <!--======================================================================-->
+
+     <!-- Add column indexes to a row after its contents reach this size -->
+     <ColumnIndexSizeInKB>256</ColumnIndexSizeInKB>
+
+     <!--
+       The maximum amount of data to store in memory before flushing to
+       disk. Note: There is one memtable per column family, and this threshold
+       is based solely on the amount of data stored, not actual heap memory
+       usage (there is some overhead in indexing the columns).
+     -->
+     <MemtableSizeInMB>32</MemtableSizeInMB>
+
+     <!--
+       The maximum number of columns in millions to store in memory
+       before flushing to disk.  This is also a per-memtable setting.
+       Use with MemtableSizeInMB to tune memory usage.
+     -->
+     <MemtableObjectCountInMillions>0.01</MemtableObjectCountInMillions>
+
+     <!-- Unlike most systems, in Cassandra writes are faster than
+          reads, so you can afford more of those in parallel.
+ 	 A good rule of thumb is 2 concurrent reads per processor core.
+          You especially want more concurrentwrites if you are using
+          CommitLogSync + CommitLogSyncDelay. -->
+     <ConcurrentReads>8</ConcurrentReads>
+     <ConcurrentWrites>32</ConcurrentWrites>
+
+     <!-- Turn on CommitLogSync to improve durability.
+          When enabled, Cassandra won't ack writes until the commit log
+          has been synced to disk.  This is less necessary in Cassandra
+          than in traditional databases since replication reduces the
+          odds of losing data from a failure after writing the log
+          entry but before it actually reaches the disk.
+     -->
+     <CommitLogSync>false</CommitLogSync>
+     <!-- Delay (in microseconds) during which additional commit log
+          entries may be written before fsync.  This will increase
+          latency slightly, but can vastly improve throughput where
+          there are many writers.  Set to zero to disable
+          (each entry will be synced individually).
+ 	 Reasonable values range from a minimal 100 to even 10000
+          if throughput matters more than latency.  (10000us = 10ms
+          write latency isn't even that bad by traditional db
+          standards.)
+     -->
+     <CommitLogSyncDelay>1000</CommitLogSyncDelay>
+
+
+     <!-- Time to wait before garbage-collection deletion markers.
+          Set this to a large enough value that you are confident
+          that the deletion marker will be propagated to all replicas
+          by the time this many seconds has elapsed, even in the
+          face of hardware failures.  The default value is ten days.
+     -->
+     <GCGraceSeconds>864000</GCGraceSeconds>
 </Storage>
