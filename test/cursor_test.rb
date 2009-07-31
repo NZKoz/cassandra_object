@@ -21,7 +21,7 @@ class CursorTest < CassandraObjectTestCase
     
     context "starting at the beginning" do
       setup do
-        @cursor = CassandraObject::Cursor.new(Invoice, Customer.associations[:invoices].column_family, @customer.key, "invoices")
+        @cursor = invoices_cursor
       end
 
       should "leave values alone it doesn't scroll past" do
@@ -40,7 +40,8 @@ class CursorTest < CassandraObjectTestCase
     
     context "starting after new" do
       setup do
-        @cursor = CassandraObject::Cursor.new(Invoice, Customer.associations[:invoices].column_family, @customer.key, "invoices", :start_after=>@new.key)
+        start_after = invoices_cursor.find(1).last_column_name
+        @cursor = invoices_cursor(:start_after=>start_after)
       end
       
       should "clean up when it hits a missing record" do
@@ -55,5 +56,9 @@ class CursorTest < CassandraObjectTestCase
   
   def association_keys_in_cassandra
     Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices").values
+  end
+  
+  def invoices_cursor(options = {})
+    CassandraObject::Cursor.new(Invoice, Customer.associations[:invoices].column_family, @customer.key, "invoices", options)
   end
 end

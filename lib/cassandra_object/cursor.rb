@@ -15,11 +15,13 @@ module CassandraObject
 
       if start_with = @options[:start_after]
         limit += 1
+      else
+        start_with = ''
       end
       
       while objects.size < number_to_find && !out_of_keys
         # start_with not supported in cassandra_client yet
-        index_results = connection.get(@column_family, @key.to_s, @super_column, nil, limit)
+        index_results = connection.get(@column_family, @key.to_s, @super_column, nil, limit, start_with..'')
         keys = index_results.keys
         values = index_results.values
         
@@ -27,7 +29,7 @@ module CassandraObject
         missing_keys = []
         out_of_keys  = keys.size < limit
 
-        if start_with
+        if !start_with.blank?
           keys.delete(start_with)
           # Start where we left off if we need to.
           start_with = keys.last
