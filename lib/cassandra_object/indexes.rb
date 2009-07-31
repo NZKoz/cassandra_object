@@ -49,15 +49,21 @@ module CassandraObject
       end
       
       def write(record)
-        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{record.key=>nil}})
+        @model_class.connection.insert(column_family, record.send(@attribute_name).to_s, {@attribute_name.to_s=>{new_key=>record.key}})
       end
       
       def remove(record)
-        @model_class.connection.remove(column_family, record.send(@attribute_name).to_s, @attribute_name.to_s, record.key)
+        # FIXME - this is hard to scale, how can I get the column name to remove without iterating
+        # over *all* the values.  Instead, rely on read-repair for now.
+        # @model_class.connection.remove(column_family, record.send(@attribute_name).to_s, @attribute_name.to_s, record.key)
       end
       
       def column_family
         @model_class.column_family + "By" + @attribute_name.to_s.camelize 
+      end
+      
+      def new_key
+        Cassandra::UUID.new
       end
     end
     

@@ -16,12 +16,12 @@ module CassandraObject
         options = DEFAULT_MULTI_GET_OPTIONS.merge(options)
         limit = options[:limit] || 100
         if options[:quorum]
-          consistency = CassandraClient::Consistency::QUORUM
+          consistency = Cassandra::Consistency::QUORUM
         else
-          consistency = CassandraClient::Consistency::WEAK
+          consistency = Cassandra::Consistency::WEAK
         end
-
-        attribute_results = connection.multi_get(column_family, keys, nil, nil, limit, consistency)
+        
+        attribute_results = connection.multi_get(column_family, keys, nil, nil, limit, ''..'', false, consistency)
         
         attribute_results.inject(ActiveSupport::OrderedHash.new) do |memo, (key, attributes)|
           memo[key] = if attributes.empty?
@@ -34,7 +34,7 @@ module CassandraObject
       end
       
       def remove(key)
-        connection.remove(column_family, key)
+        connection.remove(column_family, key.to_s)
       end
 
       def all(keyrange = ''..'', options = {})
@@ -53,7 +53,7 @@ module CassandraObject
 
       def write(key, attributes)
         returning(key || next_key) do |key|
-          connection.insert(column_family, key, attributes.stringify_keys)
+          connection.insert(column_family, key.to_s, attributes.stringify_keys)
         end
       end
 

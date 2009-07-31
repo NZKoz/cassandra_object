@@ -22,13 +22,13 @@ class IndexTest < CassandraObjectTestCase
     setup do
       @last_name = ActiveSupport::SecureRandom.hex(5)
       @koz = Customer.create :first_name=>"Michael", :last_name=>@last_name, :date_of_birth=>28.years.ago.to_date
-      connection.insert("CustomersByLastName", @last_name, {"last_name"=>{"ROFLSKATES"=>nil}})
+      connection.insert("CustomersByLastName", @last_name, {"last_name"=>{Cassandra::UUID.new=>"ROFLSKATES"}})
       @wife = Customer.create :first_name=>"Anika", :last_name=>@last_name, :date_of_birth=>30.years.ago.to_date
     end
     
     should "Return both values and clean up" do
       assert_equal [@wife, @koz], Customer.find_all_by_last_name(@last_name)
-      assert_equal [@wife.key, @koz.key], connection.get("CustomersByLastName", @last_name, "last_name").keys
+      assert_equal [@wife.key, @koz.key], connection.get("CustomersByLastName", @last_name, "last_name").values
     end
     
   end

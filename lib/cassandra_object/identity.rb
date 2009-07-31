@@ -8,6 +8,8 @@ module CassandraObject
         else
           @key = case name
           when :uuid
+            # FIXME - use Cassandra::UUID when it's compatible with
+            # insert
             lambda { [Time.now.utc.strftime("%Y%m%d%H%M%S"), Process.pid, rand(1024)] * "" }
           end
         end

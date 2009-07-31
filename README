@@ -1,60 +1,55 @@
-Provides a nice API for cassandra backed storage:
+Provides a nice API for cassandra backed storage.  Because I'm too lazy to write docs for something so new, here is an example:
 
-class Customer < CassandraObject::Base
+        class Customer < CassandraObject::Base
+          attribute :first_name,    :type => String
+          attribute :last_name,     :type => String
+          attribute :date_of_birth, :type => Date
+  
+          validate :should_be_cool
 
-  key do 
-    rand(2**63).to_s
-  end
+          key :uuid
+  
+          index :last_name
+  
+          association :invoices, :unique=>false, :inverse_of=>:customer
 
-  attribute :first_name, :type=>String
-  attribute :last_name,  :type=>String
-  attribute :screen_name, :type=>String
+          private
   
-  # Timestamps can eventually use the internal per-column stamps
-  attribute :created_at,  :type=>Date
-  
-  before_save :something
-  after_save :something_else
-  
-  # Implies :through => :CustomerAssociations, :super_column_name => "invoices", :class_name => "Invoice"
-  # Created an after_destroy to clobber the CustomerAssociations row
-  association :to => :invoices
+          def should_be_cool
+            unless ["Michael", "Anika", "Evan"].include?(first_name)
+              errors.add(:first_name, "must be that of a cool person")
+            end
+          end
 
-  # Implies :through => :ScreenNameCustomer
-  # This makes a row in a bridge CF: self.screen_name => {'id' => self.id}, and 
-  # defines a finder Customer.find_by_screen_name()
-  # For non-unique compound keys must be used
-  index :screen_name, :unique => true
-  
-  validate :some_validation
-end
 
-class Invoice < CassandraObject::Base
+        end
 
-  # Requires you to pass a Customer instance and a number at .create
-  # Hell on earth if the natural components changes
-  key [Customer, Integer] 
+        class Invoice < CassandraObject::Base
+          attribute :number, :type=>Integer
+          attribute :total, :type=>Float
+          attribute :gst_number, :type=>String
+  
+          index :number, :unique=>true
+  
+          association :customer, :unique=>true, :inverse_of=>:invoices
+  
+          migrate 1 do |attrs|
+            attrs["total"] ||= rand(2000) / 100.0
+          end
+  
+          migrate 2 do |attrs|
+            attrs["gst_number"] = "66-666-666"
+          end
+  
+          key do
+            ActiveSupport::SecureRandom.hex(64)
+          end
+        end
+        
+FAQ
+===
 
-  # Opaque JSON object
-  attribute :lines, :type=>JSON 
-  attribute :date,  :type=>Date
-  
-  before_save :something
-  after_save :something_else
-  
-  # Implies :through => :CustomerAssociations, :super_column_name => "invoices", :class_name => "Customer" 
-  # Creates an after save hook to insert
-  association :from => :customers do |parent_id|
-    # Return the customer keys to insert self.id into; in this case we get them from 
-    # whatever was available to some kind of attacher method
-    #   @customer.invoices.create()
-    # but it could be arbitrary.
-    #
-    # With double sided indexes you can also make after_destroy in either side remove 
-    # entries properly. Without them, you have to do read-repairs if you hit a record
-    # on the parent side that doesn't exist anymore.
-    [parent_id] 
-  end  
-  
-  validate :some_validation
-end
+# How do I make this work?
+
+Sorry, it's hard right now.  If you can't figure it out you should ask nzkoz for help on #cassandra on freenode.
+

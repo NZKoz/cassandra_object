@@ -23,11 +23,11 @@ module CassandraObject
     end
     
     def clear(owner)
-      connection.remove(column_family, owner.key, @association_name)
+      connection.remove(column_family, owner.key.to_s, @association_name)
     end
     
     def find(owner)
-      if key = connection.get(column_family, owner.key, @association_name.to_s, nil, 1).keys.first
+      if key = connection.get(column_family, owner.key.to_s, @association_name.to_s, nil, 1).values.first
         target_class.get(key)
       else
         nil
@@ -36,10 +36,14 @@ module CassandraObject
     
     def set(owner, record, set_inverse = true)
       clear(owner)
-      connection.insert(column_family, owner.key, {@association_name=>{record.key=>nil}})
+      connection.insert(column_family, owner.key.to_s, {@association_name=>{new_key => record.key}})
       if has_inverse? && set_inverse
         inverse.set_inverse(record, owner)
       end
+    end
+    
+    def new_key
+      Cassandra::UUID.new
     end
     
     def set_inverse(owner, record)

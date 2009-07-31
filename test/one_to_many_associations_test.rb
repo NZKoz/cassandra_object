@@ -79,7 +79,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
   end
 
   def association_keys_in_cassandra
-    Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key, "invoices").keys
+    Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices").values
   end
   
 end

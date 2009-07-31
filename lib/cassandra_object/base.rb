@@ -1,4 +1,4 @@
-require 'cassandra_client'
+require 'cassandra'
 require 'set'
 require 'cassandra_object/attributes'
 require 'cassandra_object/dirty'
@@ -11,6 +11,7 @@ require 'cassandra_object/serialization'
 require 'cassandra_object/associations'
 require 'cassandra_object/migrations'
 require 'cassandra_object/cursor'
+require 'cassandra_object/collection'
 
 module CassandraObject
   class Base
@@ -18,7 +19,7 @@ module CassandraObject
     class_inheritable_accessor :connection
     module ConnectionManagement
       def establish_connection(*args)
-        self.connection = CassandraClient.new(*args)
+        self.connection = Cassandra.new(*args)
       end
     end
     extend ConnectionManagement

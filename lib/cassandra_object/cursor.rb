@@ -10,7 +10,7 @@ module CassandraObject
     
     def find(number_to_find)
       limit       = number_to_find
-      objects     = []
+      objects     = CassandraObject::Collection.new
       out_of_keys = false
 
       if start_with = @options[:start_after]
@@ -19,7 +19,9 @@ module CassandraObject
       
       while objects.size < number_to_find && !out_of_keys
         # start_with not supported in cassandra_client yet
-        keys = connection.get(@column_family, @key, @super_column, nil, limit).keys
+        index_results = connection.get(@column_family, @key.to_s, @super_column, nil, limit)
+        keys = index_results.keys
+        values = index_results.values
         
         
         missing_keys = []
@@ -30,8 +32,8 @@ module CassandraObject
           # Start where we left off if we need to.
           start_with = keys.last
         end
-        
-        results = @target_class.multi_get(keys)
+
+        results = @target_class.multi_get(values)
         
         results.each do |(key, result)|
           if result.nil?
@@ -42,7 +44,8 @@ module CassandraObject
         unless missing_keys.empty?
           @target_class.multi_get(missing_keys, :quorum=>true).each do |(key, result)|
             if result.nil?
-              connection.remove(@column_family, @key, @super_column, key)
+              index_key = index_results.index(key)
+              connection.remove(@column_family, @key, @super_column, index_key)
               results.delete(key)
             else
               results[key] = result
@@ -50,7 +53,11 @@ module CassandraObject
           end
         end
         
-        objects += results.values
+        results.values.each do |o|
+          objects << o
+        end
+        
+        objects.last_column_name = keys.last
         limit = number_to_find - results.size
         
       end

@@ -9,7 +9,7 @@ class MigrationTest < CassandraObjectTestCase
   end
   
   test "an old invoice should get fetched and updated" do
-    key = Invoice.next_key
+    key = Invoice.next_key.to_s
     connection.insert(Invoice.column_family, key, {"schema_version"=>1, "number"=>200, "total"=>150.35})
     
     invoice = Invoice.get(key)
