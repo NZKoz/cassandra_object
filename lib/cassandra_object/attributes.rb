@@ -1,13 +1,13 @@
 module CassandraObject
   class Attribute
     FORMATS = {}
-    FORMATS[Date] = /^\d{4}-\d{2}-\d{2}$/
+    FORMATS[Date] = /^\d{4}\/\d{2}\/\d{2}$/
     FORMATS[Integer] = /^-?\d+$/
     FORMATS[Float]   = /^-?\d*\.\d*$/
     
     CONVERTERS = {}
     CONVERTERS[Date] = Proc.new do |str|
-      Date.strptime(str, "%Y-%m-%d")
+      Date.strptime(str, "%Y/%m/%d")
     end
     
     CONVERTERS[Integer] = Proc.new do |str|
