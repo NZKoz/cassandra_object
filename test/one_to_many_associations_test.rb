@@ -6,7 +6,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
     setup do
       @customer = Customer.create :first_name    => "Michael",
                                   :last_name     => "Koziarski",
-                                  :date_of_birth => "1980-08-15"
+                                  :date_of_birth => "1980/08/15"
 
       assert @customer.valid?, @customer.errors                            
 
