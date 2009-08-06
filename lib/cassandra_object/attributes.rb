@@ -114,7 +114,7 @@ module CassandraObject
 
       protected
         def attribute_method?(name)
-          @attributes.include?(name.to_s) || model_attributes[name.to_s]
+          @attributes.include?(name.to_sym) || model_attributes[name.to_sym]
         end
 
       private
