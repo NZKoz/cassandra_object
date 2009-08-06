@@ -84,6 +84,8 @@ module CassandraObject
 
   module Attributes
     extend ActiveSupport::Concern
+    include ActiveModel::AttributeMethods
+
     module ClassMethods
       def attribute(name, options)
         write_inheritable_hash(:model_attributes, {name.to_s=>Attribute.new(name, self, options)})
@@ -92,21 +94,11 @@ module CassandraObject
   
     included do
       class_inheritable_hash :model_attributes
+
+      attribute_method_suffix("", "=")
     end
   
     module InstanceMethods
-      # All this stuff should probably come from AMo
-      def method_missing(name, *args)
-        name = name.to_s
-        if name =~ /^(.*)=$/
-          write_attribute($1, args.first)
-        elsif @attributes.include?(name) || model_attributes[name]
-          read_attribute(name)
-        else
-          super
-        end
-      end
-
       def write_attribute(name, value)
         if ma = self.class.model_attributes[name]
           value = ma.check_value!(value)
@@ -127,6 +119,20 @@ module CassandraObject
           send("#{name}=", value)
         end
       end
+
+      protected
+        def attribute_method?(name)
+          @attributes.include?(name.to_s) || model_attributes[name.to_s]
+        end
+
+      private
+        def attribute(name)
+          read_attribute(name.to_sym)
+        end
+
+        def attribute=(name, value)
+          write_attribute(name.to_sym, value)
+        end
     end
   end
 end
