@@ -55,7 +55,7 @@ module CassandraObject
           return super(key, attributes)
         end
         
-        versions_to_migrate = ((version + 1)..current_schema_version)
+        versions_to_migrate = ((version.to_i + 1)..current_schema_version)
         
         migrations_to_run = versions_to_migrate.map do |v|
           migrations.find {|m| m.version == v}
@@ -67,7 +67,7 @@ module CassandraObject
         
         migrations_to_run.inject(attributes) do |attrs, migration|
           migration.run(attrs)
-          attrs[migration_column_name.to_s] = migration.version
+          attrs[migration_column_name.to_s] = migration.version.to_s
           attrs
         end
         

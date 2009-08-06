@@ -53,15 +53,29 @@ module CassandraObject
 
       def write(key, attributes)
         returning(key || next_key) do |key|
-          connection.insert(column_family, key.to_s, attributes.stringify_keys)
+          connection.insert(column_family, key.to_s, encode_attributes_hash(attributes))
         end
       end
 
       def instantiate(key, attributes)
         returning allocate do |object|
           object.instance_variable_set("@key", key)
-          object.instance_variable_set("@attributes", attributes.with_indifferent_access)
+          object.instance_variable_set("@attributes", decode_attributes_hash(attributes).with_indifferent_access)
           object.instance_variable_set("@changed_attribute_names", Set.new)
+        end
+      end
+      
+      def encode_attributes_hash(attributes)
+        attributes.inject(Hash.new) do |memo, (column_name, value)|
+          memo[column_name.to_s] = ActiveSupport::JSON.encode(value)
+          memo
+        end
+      end
+      
+      def decode_attributes_hash(attributes)
+        attributes.inject(Hash.new) do |memo, (column_name, value)|
+          memo[column_name.to_s] = ActiveSupport::JSON.decode(value)
+          memo
         end
       end
     end

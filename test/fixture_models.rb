@@ -33,7 +33,7 @@ class Invoice < CassandraObject::Base
   association :customer, :unique=>true, :inverse_of=>:invoices
   
   migrate 1 do |attrs|
-    attrs["total"] ||= rand(2000) / 100.0
+    attrs["total"] ||= (rand(2000) / 100.0).to_s
   end
   
   migrate 2 do |attrs|

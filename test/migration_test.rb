@@ -1,3 +1,5 @@
+require 'test_helper'
+
 class MigrationTest < CassandraObjectTestCase
   test "a new invoice should have the right schema version" do
     i = mock_invoice
@@ -10,7 +12,7 @@ class MigrationTest < CassandraObjectTestCase
   
   test "an old invoice should get fetched and updated" do
     key = Invoice.next_key.to_s
-    connection.insert(Invoice.column_family, key, {"schema_version"=>1, "number"=>200, "total"=>150.35})
+    connection.insert(Invoice.column_family, key, {"schema_version"=>"1", "number"=>"200", "total"=>"150.35"})
     
     invoice = Invoice.get(key)
     assert_equal 2, invoice.schema_version
