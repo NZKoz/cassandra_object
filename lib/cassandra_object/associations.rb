@@ -6,16 +6,15 @@ module CassandraObject
     extend ActiveSupport::Concern
     
     included do
-      class_inheritable_accessor :associations
-      self.associations = ActiveSupport::OrderedHash.new
+      class_inheritable_hash :associations
     end
 
     module ClassMethods
       def association(association_name, options= {})
         if options[:unique]
-          associations[association_name] = OneToOneAssociation.new(association_name, self, options)
+          write_inheritable_hash(:associations, {association_name => OneToOneAssociation.new(association_name, self, options)})
         else
-          associations[association_name] = OneToManyAssociation.new(association_name, self, options)
+          write_inheritable_hash(:associations, {association_name => OneToManyAssociation.new(association_name, self, options)})
         end
       end
       

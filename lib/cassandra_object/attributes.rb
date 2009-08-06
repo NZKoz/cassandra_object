@@ -86,12 +86,12 @@ module CassandraObject
     extend ActiveSupport::Concern
     module ClassMethods
       def attribute(name, options)
-        (self.model_attributes ||= ActiveSupport::OrderedHash.new)[name.to_s] = Attribute.new(name, self, options)
+        write_inheritable_hash(:model_attributes, {name.to_s=>Attribute.new(name, self, options)})
       end
     end
   
     included do
-      class_inheritable_accessor :model_attributes
+      class_inheritable_hash :model_attributes
     end
   
     module InstanceMethods
