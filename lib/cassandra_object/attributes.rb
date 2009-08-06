@@ -25,6 +25,7 @@ module CassandraObject
       @options = options
       
       append_validations!
+      define_methods!
     end
   
     # I think this should live somewhere in Amo
@@ -61,25 +62,10 @@ module CassandraObject
         @owner_class.validates_format_of @name, :with=>f, :unless => lambda {|obj| obj.send(name).is_a? expected_type }
       end
     end
-    
+
     def define_methods!
-      @owner_class.class_eval <<-eos
-        def #{@name}
-          val = read_attribute(:#{@name})
-          if val.is_a?(#{expected_type.inspect})
-            val
-          else
-            self.class.attributes[:#{@name}].type_cast(val)
-          end
-        end
-        
-        def #{@name}=(val)
-          write_attribute(:#{@name}, val)
-        end
-            
-      eos
+      @owner_class.define_attribute_methods(true)
     end
-        
   end
 
   module Attributes
@@ -89,6 +75,12 @@ module CassandraObject
     module ClassMethods
       def attribute(name, options)
         write_inheritable_hash(:model_attributes, {name.to_s=>Attribute.new(name, self, options)})
+      end
+
+      def define_attribute_methods(force = false)
+        return unless model_attributes
+        undefine_attribute_methods if force
+        super(model_attributes.keys)
       end
     end
   
