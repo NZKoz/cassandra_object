@@ -35,6 +35,20 @@ class BasicScenariosTest < CassandraObjectTestCase
       @customer.date_of_birth=24.5
     end
   end
+  
+  test "should return nil for attributes without a value" do
+    assert_nil @customer.preferences
+  end
+  
+  test "should let a user set a Hash valued attribute" do
+    val = {"a"=>"b"}
+    @customer.preferences = val
+    assert_equal val, @customer.preferences
+    @customer.save
+    
+    other_customer = Customer.get(@customer_key)
+    assert_equal val, other_customer.preferences
+  end
 
   test "should validate strings passed to a typed column" do
     @customer.date_of_birth = "35345908"

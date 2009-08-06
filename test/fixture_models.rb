@@ -3,6 +3,7 @@ class Customer < CassandraObject::Base
   attribute :first_name,    :type => String
   attribute :last_name,     :type => String
   attribute :date_of_birth, :type => Date
+  attribute :preferences,   :type => Hash
   
   validate :should_be_cool
 
