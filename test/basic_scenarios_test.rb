@@ -5,7 +5,7 @@ class BasicScenariosTest < CassandraObjectTestCase
     super
     @customer = Customer.create :first_name    => "Michael",
                                 :last_name     => "Koziarski",
-                                :date_of_birth => "1980-08-15"
+                                :date_of_birth => "1980/08/15"
     @customer_key = @customer.key                            
     
     assert @customer.valid?
@@ -28,6 +28,18 @@ class BasicScenariosTest < CassandraObjectTestCase
   
   test "date_of_birth is a date" do
     assert @customer.date_of_birth.is_a?(Date)
+  end
+  
+  test "should not let you assign junk to a date column" do
+    assert_raise(TypeError) do
+      @customer.date_of_birth=24.5
+    end
+  end
+
+  test "should validate strings passed to a typed column" do
+    @customer.date_of_birth = "35345908"
+    assert !@customer.valid?
+    assert @customer.errors[:date_of_birth]
   end
   
   test "should have a schema version of 0" do
