@@ -74,7 +74,7 @@ module CassandraObject
 
     module ClassMethods
       def attribute(name, options)
-        write_inheritable_hash(:model_attributes, {name => Attribute.new(name, self, options)})
+        write_inheritable_hash(:model_attributes, {name.to_s=>Attribute.new(name, self, options)})
       end
 
       def define_attribute_methods(force = false)
@@ -92,14 +92,14 @@ module CassandraObject
   
     module InstanceMethods
       def write_attribute(name, value)
-        if ma = self.class.model_attributes[name]
+        if ma = self.class.model_attributes[name.to_s]
           value = ma.check_value!(value)
         end
         @attributes[name] = value
       end
 
       def read_attribute(name)
-        if ma = self.class.model_attributes[name]
+        if ma = self.class.model_attributes[name.to_s]
           ma.type_cast(@attributes[name])
         else
           @attributes[name]
