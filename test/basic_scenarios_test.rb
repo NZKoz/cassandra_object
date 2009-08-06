@@ -23,7 +23,7 @@ class BasicScenariosTest < CassandraObjectTestCase
     assert_equal "Michael", other_customer.first_name
     assert_equal "Koziarski", other_customer.last_name
     # FIXME
-    # assert_equal Date.parse("1980-08-15"), other_customer.date_of_birth
+    assert_equal Date.parse("1980-08-15"), other_customer.date_of_birth
   end
   
   test "date_of_birth is a date" do
