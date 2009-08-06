@@ -4,6 +4,8 @@ module CassandraObject
 
     included do
       attr_reader :changed_attribute_names
+
+      attribute_method_suffix("_changed?")
     end
 
     module InstanceMethods
@@ -36,6 +38,12 @@ module CassandraObject
         @changed_attribute_names << name
         super
       end
+
+      private
+        # Handle <tt>*_changed?</tt> for +method_missing+.
+        def attribute_changed?(attr)
+          changed_attributes.include?(attr)
+        end
     end
   end
 end
