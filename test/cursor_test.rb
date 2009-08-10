@@ -10,13 +10,14 @@ class CursorTest < CassandraObjectTestCase
                                   
       @old = mock_invoice.tap {|i| @customer.invoices << i }
       
-      Customer.associations[:invoices].add(@customer, MockRecord.new("SomethingStupid"))
+      @to_die = mock_invoice.tap {|i| @customer.invoices << i }
       
       @new = mock_invoice.tap {|i| @customer.invoices << i }
       
-      assert_equal [@new.key, "SomethingStupid", @old.key],
+      assert_equal [@new.key, @to_die.key, @old.key],
                    association_keys_in_cassandra
       
+      Invoice.remove(@to_die.key)
     end
     
     context "starting at the beginning" do
@@ -27,7 +28,7 @@ class CursorTest < CassandraObjectTestCase
       should "leave values alone it doesn't scroll past" do
         assert_equal [@new], @cursor.find(1)
 
-        assert_equal [@new.key, "SomethingStupid", @old.key],
+        assert_equal [@new.key, @to_die.key, @old.key],
                      association_keys_in_cassandra
       end
 

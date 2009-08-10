@@ -9,12 +9,12 @@ class IndexTest < CassandraObjectTestCase
     end
     
     should "Return both values" do
-      assert_equal [@wife, @koz], Customer.find_all_by_last_name(@last_name)
+      assert_equal [@wife.key, @koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
     end
     
     should "return the older when the newer is destroyed" do
       @wife.destroy
-      assert_equal [@koz], Customer.find_all_by_last_name(@last_name)
+      assert_equal [@koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
     end
   end
 
@@ -27,7 +27,7 @@ class IndexTest < CassandraObjectTestCase
     end
     
     should "Return both values and clean up" do
-      assert_equal [@wife, @koz], Customer.find_all_by_last_name(@last_name)
+      assert_equal [@wife.key, @koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
       assert_equal [@wife.key, @koz.key], connection.get("CustomersByLastName", @last_name, "last_name").values
     end
     
@@ -51,7 +51,7 @@ class IndexTest < CassandraObjectTestCase
   
   context " A corrupt unique index" do
     setup do
-      connection.insert("InvoicesByNumber", '15' , {"number"=>{"key"=>"HAHAHAHA"}})
+      connection.insert("InvoicesByNumber", '15' , {"key"=>"HAHAHAHA"})
     end
     
     should "return nil on fetch and cleanup" do
