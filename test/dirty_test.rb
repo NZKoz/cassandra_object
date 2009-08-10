@@ -6,9 +6,9 @@ class DirtyTest < CassandraObjectTestCase
 
     @customer = Customer.create :first_name    => "Michael",
                                 :last_name     => "Koziarski",
-                                :date_of_birth => "1980-08-15"
+                                :date_of_birth => "1980/08/15"
     @customer_key = @customer.key
-    assert @customer.valid?
+    assert @customer.valid?, @customer.errors.full_messages.to_sentence
   end
 
   test "a new object can be retrieved by key" do

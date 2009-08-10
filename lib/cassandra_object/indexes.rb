@@ -7,7 +7,7 @@ module CassandraObject
     end
     
     class UniqueIndex
-      def initialize(attribute_name, model_class)
+      def initialize(attribute_name, model_class, options)
         @attribute_name = attribute_name
         @model_class    = model_class
       end
@@ -38,13 +38,14 @@ module CassandraObject
     end
     
     class Index
-      def initialize(attribute_name, model_class)
+      def initialize(attribute_name, model_class, options)
         @attribute_name = attribute_name
         @model_class    = model_class
+        @reversed       = options[:reversed]
       end
       
       def find(attribute_value, options = {})
-        cursor = CassandraObject::Cursor.new(@model_class, column_family, attribute_value.to_s, @attribute_name.to_s, :start_after=>options[:start_after])
+        cursor = CassandraObject::Cursor.new(@model_class, column_family, attribute_value.to_s, @attribute_name.to_s, :start_after=>options[:start_after], :reversed=>@reversed)
         cursor.find(options[:limit] || 100)
       end
       
@@ -70,8 +71,8 @@ module CassandraObject
     module ClassMethods
       def index(attribute_name, options = {})
         self.indexes ||= {}.with_indifferent_access
-        if options[:unique]
-          self.indexes[attribute_name] = UniqueIndex.new(attribute_name, self)
+        if options.delete(:unique)
+          self.indexes[attribute_name] = UniqueIndex.new(attribute_name, self, options)
           class_eval <<-eom
             def self.find_by_#{attribute_name}(value)
               indexes[:#{attribute_name}].find(value)
@@ -86,7 +87,7 @@ module CassandraObject
             end
           eom
         else
-          self.indexes[attribute_name] = Index.new(attribute_name, self)
+          self.indexes[attribute_name] = Index.new(attribute_name, self, options)
           class_eval <<-eom
             def self.find_all_by_#{attribute_name}(value, options = {})
               self.indexes[:#{attribute_name}].find(value, options)

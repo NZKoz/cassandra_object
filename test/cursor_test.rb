@@ -14,7 +14,7 @@ class CursorTest < CassandraObjectTestCase
       
       @new = mock_invoice.tap {|i| @customer.invoices << i }
       
-      assert_equal [@new.key, @to_die.key, @old.key],
+      assert_ordered [@new.key, @to_die.key, @old.key],
                    association_keys_in_cassandra
       
       Invoice.remove(@to_die.key)
@@ -22,32 +22,32 @@ class CursorTest < CassandraObjectTestCase
     
     context "starting at the beginning" do
       setup do
-        @cursor = invoices_cursor
+        @cursor = invoices_cursor(:reversed=>true)
       end
 
       should "leave values alone it doesn't scroll past" do
         assert_equal [@new], @cursor.find(1)
 
-        assert_equal [@new.key, @to_die.key, @old.key],
+        assert_ordered [@new.key, @to_die.key, @old.key],
                      association_keys_in_cassandra
       end
 
       should "clean up when it hits a missing record" do
         assert_equal [@new, @old], @cursor.find(2)
-        assert_equal [@new.key, @old.key],
+        assert_ordered [@new.key, @old.key],
                      association_keys_in_cassandra
       end
     end
     
     context "starting after new" do
       setup do
-        start_after = invoices_cursor.find(1).last_column_name
-        @cursor = invoices_cursor(:start_after=>start_after)
+        start_after = invoices_cursor(:reversed=>true).find(1).last_column_name
+        @cursor = invoices_cursor(:start_after=>start_after, :reversed=>true)
       end
       
       should "clean up when it hits a missing record" do
         assert_equal [@old], @cursor.find(1)
-        assert_equal [@new.key, @old.key],
+        assert_ordered [@new.key, @old.key],
                      association_keys_in_cassandra
       end
     end
@@ -56,7 +56,8 @@ class CursorTest < CassandraObjectTestCase
   
   
   def association_keys_in_cassandra
-    Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices").values
+    res = Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices", :reversed=>true)
+    res.values
   end
   
   def invoices_cursor(options = {})

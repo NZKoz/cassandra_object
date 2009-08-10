@@ -21,10 +21,9 @@ module CassandraObject
       
       while objects.size < number_to_find && !out_of_keys
         # start_with not supported in cassandra_client yet
-        index_results = connection.get(@column_family, @key.to_s, @super_column, :count=>limit, :start=>start_with)
+        index_results = connection.get(@column_family, @key.to_s, @super_column, :count=>limit, :start=>start_with, :reversed=>@options[:reversed])
         keys = index_results.keys
         values = index_results.values
-        
         
         missing_keys = []
         out_of_keys  = keys.size < limit

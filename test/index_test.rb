@@ -9,7 +9,7 @@ class IndexTest < CassandraObjectTestCase
     end
     
     should "Return both values" do
-      assert_equal [@wife.key, @koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
+      assert_ordered [@wife.key, @koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
     end
     
     should "return the older when the newer is destroyed" do
@@ -27,8 +27,8 @@ class IndexTest < CassandraObjectTestCase
     end
     
     should "Return both values and clean up" do
-      assert_equal [@wife.key, @koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
-      assert_equal [@wife.key, @koz.key], connection.get("CustomersByLastName", @last_name, "last_name").values
+      assert_ordered [@wife.key, @koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
+      assert_ordered [@wife.key, @koz.key], connection.get("CustomersByLastName", @last_name, "last_name", :reversed=>true).values
     end
     
   end

@@ -9,7 +9,14 @@ Rake::TestTask.new(:test) do |t|
 end
 
 task :cleanup do
+  unless defined?(CassandraObject)
+    $: << 'test'
+    $: << 'lib'
+    require 'test_helper'
+  end
+  puts "Clearing keyspace! ..."
   CassandraObject::Base.connection.clear_keyspace!
+  puts "Cleared"
 end
 
 task :default=>[:test, :cleanup] do
