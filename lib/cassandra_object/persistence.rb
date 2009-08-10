@@ -18,10 +18,10 @@ module CassandraObject
         if options[:quorum]
           consistency = Cassandra::Consistency::QUORUM
         else
-          consistency = Cassandra::Consistency::WEAK
+          consistency = Cassandra::Consistency::ONE
         end
         
-        attribute_results = connection.multi_get(column_family, keys, nil, nil, limit, ''..'', false, consistency)
+        attribute_results = connection.multi_get(column_family, keys, :count=>limit, :consistency=>consistency)
         
         attribute_results.inject(ActiveSupport::OrderedHash.new) do |memo, (key, attributes)|
           memo[key] = if attributes.empty?
@@ -38,7 +38,7 @@ module CassandraObject
       end
 
       def all(keyrange = ''..'', options = {})
-        connection.get_key_range(column_family, keyrange, options[:limit] || 100).map {|key| get(key) }
+        connection.get_key_range(column_family, keyrange, :count=>(options[:limit] || 100)).map {|key| get(key) }
       end
       
       def first(keyrange = ''..'', options = {})
