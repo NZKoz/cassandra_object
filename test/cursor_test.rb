@@ -39,14 +39,14 @@ class CursorTest < CassandraObjectTestCase
       end
     end
     
-    context "starting after new" do
+    context "starting at an offset" do
       setup do
         start_after = invoices_cursor(:reversed=>true).find(1).last_column_name
         @cursor = invoices_cursor(:start_after=>start_after, :reversed=>true)
       end
       
       should "clean up when it hits a missing record" do
-        assert_equal [@old], @cursor.find(1)
+        assert_equal [@old.key], @cursor.find(1).map(&:key), "Wasn't expecting #{@new.key.inspect}"
         assert_ordered [@new.key, @old.key],
                      association_keys_in_cassandra
       end

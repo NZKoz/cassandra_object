@@ -16,36 +16,37 @@ module CassandraObject
       if start_with = @options[:start_after]
         limit += 1
       else
-        start_with = ''
+        start_with = nil
       end
       
       while objects.size < number_to_find && !out_of_keys
-        # start_with not supported in cassandra_client yet
-        index_results = connection.get(@column_family, @key.to_s, @super_column, :count=>limit, :start=>start_with, :reversed=>@options[:reversed])
+        args = []
+        index_results = connection.get(@column_family, @key.to_s, @super_column, :count=>limit,
+                                                                                 :start=>start_with,
+                                                                                 :reversed=>@options[:reversed])
+
+        out_of_keys  = index_results.size < limit
+
+        if !start_with.blank?
+          index_results.delete(start_with)
+        end
+
         keys = index_results.keys
         values = index_results.values
         
         missing_keys = []
-        out_of_keys  = keys.size < limit
-
-        if !start_with.blank?
-          keys.delete(start_with)
-          # Start where we left off if we need to.
-          start_with = keys.last
-        end
-
-        results = @target_class.multi_get(values)
         
+        results = @target_class.multi_get(values)
         results.each do |(key, result)|
           if result.nil?
             missing_keys << key
           end
         end
-        
+    
         unless missing_keys.empty?
           @target_class.multi_get(missing_keys, :quorum=>true).each do |(key, result)|
+            index_key = index_results.index(key)
             if result.nil?
-              index_key = index_results.index(key)
               connection.remove(@column_family, @key, @super_column, index_key)
               results.delete(key)
             else
@@ -53,13 +54,13 @@ module CassandraObject
             end
           end
         end
-        
+
         results.values.each do |o|
           objects << o
         end
         
-        objects.last_column_name = keys.last
-        limit = number_to_find - results.size
+        start_with = objects.last_column_name = keys.last
+        limit = (number_to_find - results.size) + 1
         
       end
       

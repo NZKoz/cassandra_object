@@ -67,7 +67,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
       end
     
       should "return the first invoice when told to start after the second" do
-        assert_ordered [@invoice], @customer.invoices.all(:limit=>1, :start_after=>@second_invoice.key)
+        assert_ordered [@invoice.key], @customer.invoices.all(:limit=>1, :start_after=>index_key_for(@second_invoice)).map(&:key)
         assert_ordered [@third_invoice.key,"SomethingStupid", @second_invoice.key,  @invoice.key],
                      association_keys_in_cassandra
       end
@@ -79,7 +79,15 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
   end
 
   def association_keys_in_cassandra
-    Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices").values
+    Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices", :reversed=>true).values
+  end
+  
+  def index_key_for(object)
+    Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices").each do |(key, value)|
+      if value == object.key
+        return key
+      end
+    end
   end
   
 end

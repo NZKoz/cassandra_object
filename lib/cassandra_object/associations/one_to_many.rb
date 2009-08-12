@@ -10,7 +10,7 @@ module CassandraObject
     end
     
     def find(owner, options = {})
-      cursor = CassandraObject::Cursor.new(target_class, column_family, owner.key, @association_name, :start_after=>options[:start_after])
+      cursor = CassandraObject::Cursor.new(target_class, column_family, owner.key, @association_name, :start_after=>options[:start_after], :reversed=>@options[:reversed])
       cursor.find(options[:limit] || 100)
     end
     
