@@ -27,10 +27,6 @@ module CassandraObject
     end
     
     module InstanceMethods
-      def changed_attributes
-        super.merge("schema_version"=>schema_version)
-      end
-      
       def schema_version
         Integer(@attributes[:schema_version] || self.class.current_schema_version)
       end

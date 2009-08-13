@@ -61,7 +61,7 @@ module CassandraObject
         returning allocate do |object|
           object.instance_variable_set("@key", parse_key(key))
           object.instance_variable_set("@attributes", decode_attributes_hash(attributes).with_indifferent_access)
-          object.instance_variable_set("@changed_attribute_names", Set.new)
+          object.write_attribute(:schema_version, object.schema_version)
         end
       end
       
@@ -86,7 +86,8 @@ module CassandraObject
           run_callbacks :before_create
         end
         run_callbacks :before_save
-        
+
+        changed_attributes = changed.inject({}) { |h, n| h[n] = read_attribute(n); h }
         returned_key = self.class.write(key, changed_attributes)
         @key ||= returned_key
         run_callbacks :after_save

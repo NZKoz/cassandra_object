@@ -14,12 +14,21 @@ class DirtyTest < CassandraObjectTestCase
   test "a new object can be retrieved by key" do
     assert_equal "Michael", @customer.first_name
     assert !@customer.changed?
+    assert_equal [], @customer.changed
+    assert_equal({}, @customer.changes)
 
     @customer.first_name = "Josh"
     assert_equal "Josh", @customer.first_name
 
     assert @customer.changed?
-    assert_equal Set.new([:first_name]), @customer.changed
+    assert_equal ["first_name"], @customer.changed
+    assert_equal({"first_name" => ["Michael", "Josh"]}, @customer.changes)
+
     assert @customer.first_name_changed?
+    assert_equal ["Michael", "Josh"], @customer.first_name_change
+    assert_equal "Michael", @customer.first_name_was
+
+    @customer.reset_first_name!
+    assert_equal "Michael", @customer.first_name
   end
 end
