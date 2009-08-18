@@ -16,7 +16,7 @@ Provides a nice API for cassandra backed storage.  Because I'm too lazy to write
           private
   
           def should_be_cool
-            unless ["Michael", "Anika", "Evan"].include?(first_name)
+            unless ["Michael", "Anika", "Evan", "James"].include?(first_name)
               errors.add(:first_name, "must be that of a cool person")
             end
           end
