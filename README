@@ -53,3 +53,9 @@ FAQ
 
 Sorry, it's hard right now.  If you can't figure it out you should ask nzkoz for help on #cassandra on freenode.
 
+You need to have a checkout of edge rails in ../rails if you want to run the tests.
+
+# Should I use this in production?
+
+Only if you're looking to help out with the development, there are a bunch of rough edges right now.
+
