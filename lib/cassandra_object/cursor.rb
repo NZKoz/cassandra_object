@@ -3,7 +3,7 @@ module CassandraObject
     def initialize(target_class, column_family, key, super_column, options={})
       @target_class  = target_class
       @column_family = column_family
-      @key           = key
+      @key           = key.to_s
       @super_column  = super_column
       @options       = options
     end
@@ -20,10 +20,9 @@ module CassandraObject
       end
       
       while objects.size < number_to_find && !out_of_keys
-        args = []
-        index_results = connection.get(@column_family, @key.to_s, @super_column, :count=>limit,
-                                                                                 :start=>start_with,
-                                                                                 :reversed=>@options[:reversed])
+        index_results = connection.get(@column_family, @key, @super_column, :count=>limit,
+                                                                            :start=>start_with,
+                                                                            :reversed=>@options[:reversed])
 
         out_of_keys  = index_results.size < limit
 

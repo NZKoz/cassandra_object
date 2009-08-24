@@ -32,7 +32,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
     
       should "tidy up when fetching" do
         assert_equal [@invoice], @customer.invoices.all
-        assert_equal [@invoice.key], association_keys_in_cassandra
+        assert_equal [@invoice.key.to_s], association_keys_in_cassandra
       end
     end
   
@@ -60,7 +60,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
       end
     
       should "return them all when passed a limit of 3, and clean up the keys" do
-        assert_ordered [@third_invoice, @second_invoice, @invoice], @customer.invoices.all(:limit=>3)
+        assert_ordered [@third_invoice, @second_invoice, @invoice], @customer.invoices.all(:limit=>3), false
         assert_ordered [@third_invoice.key, @second_invoice.key,  @invoice.key],
                      association_keys_in_cassandra
                    
@@ -84,10 +84,11 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
   
   def index_key_for(object)
     Customer.connection.get(Customer.associations[:invoices].column_family, @customer.key.to_s, "invoices").each do |(key, value)|
-      if value == object.key
+      if value == object.key.to_s
         return key
       end
     end
+    raise "Not found"
   end
   
 end

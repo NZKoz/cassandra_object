@@ -19,7 +19,7 @@ module CassandraObject
       end
       
       def remove(key)
-        connection.remove("#{name}Relationships", key)
+        connection.remove("#{name}Relationships", key.to_s)
         super
       end
     end

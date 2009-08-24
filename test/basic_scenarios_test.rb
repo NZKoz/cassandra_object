@@ -6,7 +6,7 @@ class BasicScenariosTest < CassandraObjectTestCase
     @customer = Customer.create :first_name    => "Michael",
                                 :last_name     => "Koziarski",
                                 :date_of_birth => "1980/08/15"
-    @customer_key = @customer.key                            
+    @customer_key = @customer.key.to_s                          
     
     assert @customer.valid?
   end
@@ -17,7 +17,6 @@ class BasicScenariosTest < CassandraObjectTestCase
 
   test "a new object can be retrieved by key" do
     other_customer = Customer.get(@customer_key)
-
     assert_equal @customer, other_customer
     
     assert_equal "Michael", other_customer.first_name
@@ -70,8 +69,15 @@ class BasicScenariosTest < CassandraObjectTestCase
   test "creating a new record starts with the right version" do
     @invoice  = mock_invoice
 
-    raw_result = Invoice.connection.get("Invoices", @invoice.key)
+    raw_result = Invoice.connection.get("Invoices", @invoice.key.to_s)
     assert_equal Invoice.current_schema_version, ActiveSupport::JSON.decode(raw_result["schema_version"])
+  end
+  
+  test "to_param works" do
+    invoice = mock_invoice
+    param = invoice.to_param
+    assert_match /[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/, param
+    assert_equal invoice.key, Invoice.parse_key(param)
   end
   
   context "destroying a customer with invoices" do
@@ -83,11 +89,11 @@ class BasicScenariosTest < CassandraObjectTestCase
     end
     
     should "Have removed the customer" do
-      assert Customer.connection.get("Customers", @customer.key).empty?
+      assert Customer.connection.get("Customers", @customer.key.to_s).empty?
     end
     
     should "Have removed the associations too" do
-      assert_equal Hash.new, Customer.connection.get("CustomerRelationships", @customer.key)
+      assert_equal Hash.new, Customer.connection.get("CustomerRelationships", @customer.key.to_s)
     end
   end
 end

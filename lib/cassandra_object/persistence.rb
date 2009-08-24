@@ -21,7 +21,7 @@ module CassandraObject
           consistency = Cassandra::Consistency::ONE
         end
         
-        attribute_results = connection.multi_get(column_family, keys, :count=>limit, :consistency=>consistency)
+        attribute_results = connection.multi_get(column_family, keys.map(&:to_s), :count=>limit, :consistency=>consistency)
         
         attribute_results.inject(ActiveSupport::OrderedHash.new) do |memo, (key, attributes)|
           memo[key] = if attributes.empty?
@@ -59,7 +59,7 @@ module CassandraObject
 
       def instantiate(key, attributes)
         returning allocate do |object|
-          object.instance_variable_set("@key", key)
+          object.instance_variable_set("@key", parse_key(key))
           object.instance_variable_set("@attributes", decode_attributes_hash(attributes).with_indifferent_access)
           object.instance_variable_set("@changed_attribute_names", Set.new)
         end

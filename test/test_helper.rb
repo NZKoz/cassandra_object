@@ -28,7 +28,13 @@ class CassandraObjectTestCase < ActiveSupport::TestCase
     CassandraObject::Base.connection
   end
   
-  def assert_ordered(expected_object_order, actual_order)
+  def assert_ordered(expected_object_order, actual_order, to_s_before_comparing = true)
+    # don't use map! so we don't go changing user's arguments
+    if to_s_before_comparing
+      expected_object_order = expected_object_order.map(&:to_s) 
+      actual_order = actual_order.map(&:to_s)
+    end
+    
     assert_equal Set.new(expected_object_order), Set.new(actual_order), "Collections weren't equal"
     actual_indexes = actual_order.map do |e|
       expected_object_order.index(e)

@@ -36,7 +36,7 @@ module CassandraObject
     
     def set(owner, record, set_inverse = true)
       clear(owner)
-      connection.insert(column_family, owner.key.to_s, {@association_name=>{new_key => record.key}})
+      connection.insert(column_family, owner.key.to_s, {@association_name=>{new_key => record.key.to_s}})
       if has_inverse? && set_inverse
         inverse.set_inverse(record, owner)
       end

@@ -10,12 +10,12 @@ module CassandraObject
     end
     
     def find(owner, options = {})
-      cursor = CassandraObject::Cursor.new(target_class, column_family, owner.key, @association_name, :start_after=>options[:start_after], :reversed=>@options[:reversed])
+      cursor = CassandraObject::Cursor.new(target_class, column_family, owner.key.to_s, @association_name, :start_after=>options[:start_after], :reversed=>@options[:reversed])
       cursor.find(options[:limit] || 100)
     end
     
     def add(owner, record, set_inverse = true)
-      connection.insert(column_family, owner.key.to_s, {@association_name=>{new_key=>record.key}})
+      connection.insert(column_family, owner.key.to_s, {@association_name=>{new_key=>record.key.to_s}})
       if has_inverse? && set_inverse
         inverse.set_inverse(record, owner)
       end

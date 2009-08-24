@@ -41,9 +41,7 @@ class Invoice < CassandraObject::Base
     attrs["gst_number"] = "66-666-666"
   end
   
-  key do
-    ActiveSupport::SecureRandom.hex(64)
-  end
+  key :uuid
 end
 
 MockRecord = Struct.new(:key)
