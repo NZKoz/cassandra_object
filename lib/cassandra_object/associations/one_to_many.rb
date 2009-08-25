@@ -85,7 +85,21 @@ module CassandraObject
     def all(options = {})
       @association.find(@owner, options)
     end
-
+    
+    def create(attributes)
+      returning @association.target_class.create(attributes) do |record|
+        if record.valid?
+          self << record
+        end
+      end
+    end
+    
+    def create!(attributes)
+      returning @association.target_class.create!(attributes) do |record|
+        self << record
+      end
+    end
+    
     def target
       @target ||= begin
         @loaded = true

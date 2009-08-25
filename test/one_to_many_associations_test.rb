@@ -73,6 +73,30 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
       end
     end
   end
+  
+  context "Association proxy create" do
+    setup do
+      @customer = Customer.create! :first_name    => "Michael",
+                                   :last_name     => "Koziarski",
+                                   :date_of_birth => "1980/08/15"
+      @invoice = @customer.invoices.create :number=>50, :total=>25.0
+    end
+    
+    should "return the invoice" do
+      assert_kind_of Invoice, @invoice
+    end
+    
+    should "have set the attributes" do
+      assert_equal 50, @invoice.number
+      assert_equal 25.0, @invoice.total
+    end
+    
+    should "have set the inverse" do
+      assert_equal @customer, @invoice.customer 
+    end
+    
+    
+  end
 
   def add_junk_key
     Customer.associations[:invoices].add(@customer, MockRecord.new("SomethingStupid"))
