@@ -99,7 +99,7 @@ module CassandraObject
     # the supplied attributes and add it to this 
     # association
     #
-    # @param  [Hash] the attributes with which to create the object
+    # @param  [Hash] attributes the attributes with which to create the object
     # @return [CassandraObject::Base] the newly created object
     #
     def create(attributes)
