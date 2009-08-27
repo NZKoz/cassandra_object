@@ -9,10 +9,17 @@ module CassandraObject
   module Identity
     extend ActiveSupport::Concern
     module ClassMethods
-      def key(name = :uuid, &blk)
+      # Indicate what kind of key the model will have: uuid or natural
+      #
+      # @param [:uuid, :natural] the type of key
+      # @param the options you want to pass along to the key factory (like :attributes => :name, for a natural key).
+      # 
+      def key(name = :uuid, *options)
         @key_factory = case name
         when :uuid
           UUIDKeyFactory.new
+        when :natural
+          NaturalKeyFactory.new(*options)
         end
       end
     

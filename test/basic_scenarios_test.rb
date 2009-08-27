@@ -96,4 +96,16 @@ class BasicScenariosTest < CassandraObjectTestCase
       assert_equal Hash.new, Customer.connection.get("CustomerRelationships", @customer.key.to_s)
     end
   end
+
+  context "An object with a natural key" do
+    setup do
+      @payment = Payment.new :reference_number => "12345",
+                             :amount           => 1001
+      @payment.save!
+    end
+
+    should "create a natural key based on that attr" do
+      assert_equal "12345", @payment.key.to_s
+    end
+  end
 end

@@ -44,4 +44,11 @@ class Invoice < CassandraObject::Base
   key :uuid
 end
 
+class Payment < CassandraObject::Base
+  attribute :reference_number, :type => String
+  attribute :amount,           :type => Integer
+
+  key :natural, :attributes => :reference_number
+end
+
 MockRecord = Struct.new(:key)

@@ -52,7 +52,7 @@ module CassandraObject
       end
 
       def write(key, attributes)
-        returning(key || next_key) do |key|
+        returning(key || next_key(attributes)) do |key|
           connection.insert(column_family, key.to_s, encode_attributes_hash(attributes))
         end
       end
