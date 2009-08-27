@@ -55,6 +55,19 @@ module Identity
         assert_equal "james-23", key.to_param
       end
     end
+
+    context "With a custom separator" do
+      setup do
+        @key_factory = CassandraObject::Identity::NaturalKeyFactory.new :attributes => [:name, :age],
+                                                                        :separator  => "#"
+      end
+
+      should "join the attributes with the custom separator" do
+        key = @key_factory.next_key(stub(:name => "james", :age => 23))
+
+        assert_equal "james#23", key.to_s
+      end
+    end
   end
 end
 

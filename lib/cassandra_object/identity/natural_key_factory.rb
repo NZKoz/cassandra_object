@@ -23,7 +23,7 @@ module CassandraObject
 
       def initialize(options)
         @attributes = [*options[:attributes]]
-        @separator  = "-"
+        @separator  = options[:separator] || "-"
       end
 
       def next_key(object)
