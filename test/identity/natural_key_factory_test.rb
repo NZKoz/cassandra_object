@@ -8,7 +8,7 @@ module Identity
       end
 
       should "have a key whose string and param value is the value of that attribute" do
-        @key = @key_factory.next_key({:name => "james"})
+        @key = @key_factory.next_key({"name" => "james"})
 
         assert_equal "james", @key.to_s
         assert_equal "james", @key.to_param
@@ -35,7 +35,7 @@ module Identity
       end
 
       should "create a key whose string value is the two values, joined with a separator" do
-        key = @key_factory.next_key({:name => "james", :age => 23})
+        key = @key_factory.next_key({"name" => "james", "age" => 23})
         
         assert_equal "james-23", key.to_s
         assert_equal "james-23", key.to_param
@@ -63,7 +63,7 @@ module Identity
       end
 
       should "join the attributes with the custom separator" do
-        key = @key_factory.next_key({:name => "james", :age => 23})
+        key = @key_factory.next_key({"name" => "james", "age" => 23})
 
         assert_equal "james#23", key.to_s
       end
