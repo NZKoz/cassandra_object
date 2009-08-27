@@ -1,6 +1,7 @@
 require 'cassandra_object/identity/abstract_key_factory'
 require 'cassandra_object/identity/key'
 require 'cassandra_object/identity/uuid_key_factory'
+require 'cassandra_object/identity/natural_key_factory'
 
 module CassandraObject
   # Some docs will be needed here but the gist of this is simple.  Instead of returning a string, Base#key  now returns a key object.
