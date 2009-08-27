@@ -94,6 +94,13 @@ module CassandraObject
       @association.find(@owner, options)
     end
     
+    # Create a record of the associated type with 
+    # the supplied attributes and add it to this 
+    # association
+    #
+    # @param  [Hash] the attributes with which to create the object
+    # @return [CassandraObject::Base] the newly created object
+    #
     def create(attributes)
       returning @association.target_class.create(attributes) do |record|
         if record.valid?
