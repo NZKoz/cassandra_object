@@ -94,8 +94,20 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
     should "have set the inverse" do
       assert_equal @customer, @invoice.customer 
     end
-    
-    
+  end
+
+  context "Association proxy all" do
+    setup do
+      @customer = Customer.create! :first_name    => "Michael",
+                                   :last_name     => "Koziarski",
+                                   :date_of_birth => "1980/08/15"
+      @first  = @customer.invoices.create :number => 50, :total => 25.0
+      @second = @customer.invoices.create :number => 50, :total => 25.0
+    end
+
+    should "suport overriding :reversed value" do
+      assert_ordered [@first.key, @second.key], @customer.invoices.all(:reversed => false).map(&:key)
+    end
   end
 
   def add_junk_key
