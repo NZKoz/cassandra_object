@@ -1,3 +1,4 @@
+require 'cassandra_object/identity/abstract_key_factory'
 require 'cassandra_object/identity/uuid_key_factory'
 
 module CassandraObject

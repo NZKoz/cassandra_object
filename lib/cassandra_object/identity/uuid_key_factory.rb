@@ -1,7 +1,7 @@
 module CassandraObject
   module Identity
     # Key factories need to support 3 operations
-    class UUIDKeyFactory
+    class UUIDKeyFactory < AbstractKeyFactory
       class UUID < Cassandra::UUID
         # to_param should return a nice-readable representation of the key suitable to chuck into URLs
         def to_param
