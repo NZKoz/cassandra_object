@@ -89,6 +89,7 @@ module CassandraObject
     # @option opts [String]  :start_after the key after which to start returning results
     # @option opts [Boolean] :reversed return the results in reverse order (the default is false, or whatever you have it set to on the association declaration
     # @option opts [Integer] :limit the max number of results to return
+    # @return      [Array<CassandraObject::Base>] an array of objects
     #
     def all(options = {})
       @association.find(@owner, options)
