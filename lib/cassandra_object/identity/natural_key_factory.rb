@@ -4,37 +4,38 @@ module CassandraObject
       class NaturalKey
         include Key
 
-        attr_reader :fragments
+        attr_reader :value
 
-        def initialize(fragments)
-          @fragments = fragments
+        def initialize(value)
+          @value = value
         end
 
         def to_s
-          fragments.join
+          value
         end
 
         def to_param
-          fragments.join
+          value
         end
       end
 
-      attr_reader :attributes
+      attr_reader :attributes, :separator
 
       def initialize(options)
         @attributes = [*options[:attributes]]
+        @separator  = "-"
       end
 
       def next_key(object)
-        NaturalKey.new(attributes.map { |a| object.send(a) })
+        NaturalKey.new(attributes.map { |a| object.send(a) }.join(separator))
       end
 
       def parse(paramized_key)
-        NaturalKey.new(paramized_key.split)
+        NaturalKey.new(paramized_key)
       end
 
       def create(paramized_key)
-        NaturalKey.new(paramized_key.split)
+        NaturalKey.new(paramized_key)
       end
     end
   end
