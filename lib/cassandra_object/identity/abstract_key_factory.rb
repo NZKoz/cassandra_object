@@ -28,7 +28,7 @@ module CassandraObject
       # @return [CassandraObject::Identity::Key] the key
       #
       def create(string)
-        UUID.new(string)
+        raise NotImplementedError, "#{self.class.name}#create isn't implemented."
       end
     end
   end
