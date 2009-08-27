@@ -17,6 +17,14 @@ module CassandraObject
         def to_param
           value
         end
+
+        def ==(other)
+          other.is_a?(NaturalKey) && other.value == value
+        end
+
+        def eql?(other)
+          other == self
+        end
       end
 
       attr_reader :attributes, :separator

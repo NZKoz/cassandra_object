@@ -68,6 +68,24 @@ module Identity
         assert_equal "james#23", key.to_s
       end
     end
+
+    context "Natural keys" do
+      setup do
+        @james         = CassandraObject::Identity::NaturalKeyFactory::NaturalKey.new("james")
+        @another_james = CassandraObject::Identity::NaturalKeyFactory::NaturalKey.new("james")
+        @joe           = CassandraObject::Identity::NaturalKeyFactory::NaturalKey.new("joe")
+      end
+
+      should "be equal, if their values are equal" do
+        assert @james == @another_james
+        assert @james.eql?(@another_james)
+      end
+
+      should "not be equal if their values are different" do
+        assert @james != @joe
+        assert !@james.eql?(@joe)
+      end
+    end
   end
 end
 
