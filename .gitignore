@@ -1,2 +1,4 @@
 pkg
 cassandra_object.gemspec
+.yardoc
+doc/
