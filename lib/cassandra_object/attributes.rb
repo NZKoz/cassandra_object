@@ -92,7 +92,7 @@ module CassandraObject
   
     module InstanceMethods
       def write_attribute(name, value)
-        if ma = self.class.model_attributes[name]
+        if ma = self.class.model_attributes[name.to_sym]
           value = ma.check_value!(value)
         end
         @attributes[name] = value
