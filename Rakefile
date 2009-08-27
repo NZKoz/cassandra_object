@@ -11,7 +11,7 @@ begin
     s.homepage = ""
     s.description = ""
     s.authors = ["Michael Koziarski"]
-    file_list = FileList.new("[A-Z]*.*", "{bin,generators,lib,test,spec,rails}/**/*") do |f|
+    file_list = FileList.new("[A-Z]*.*", "{bin,generators,lib,test,spec,rails,vendor}/**/*") do |f|
     end
     s.files = file_list
   end
