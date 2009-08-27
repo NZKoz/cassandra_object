@@ -22,7 +22,7 @@ module CassandraObject
     # Key factories need to support 3 operations
     class UUIDKeyFactory
       # Next key takes an object and returns the key object it should use.
-      # object will be ignored with synthetic keys but could be useful with synthetic ones
+      # object will be ignored with synthetic keys but could be useful with natural ones
       def next_key(object)
         UUID.new
       end
