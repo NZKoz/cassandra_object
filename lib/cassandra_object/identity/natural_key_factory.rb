@@ -2,6 +2,8 @@ module CassandraObject
   module Identity
     class NaturalKeyFactory < AbstractKeyFactory
       class NaturalKey
+        include Key
+
         attr_reader :fragments
 
         def initialize(fragments)
