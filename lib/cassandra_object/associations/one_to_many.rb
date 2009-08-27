@@ -85,11 +85,11 @@ module CassandraObject
     
     # Get the targets of this association proxy
     #
-    # @param [Hash] options the options with which to modify this query
-    # @option opts [String]  :start_after the key after which to start returning results
-    # @option opts [Boolean] :reversed return the results in reverse order (the default is false, or whatever you have it set to on the association declaration
-    # @option opts [Integer] :limit the max number of results to return
-    # @return      [Array<CassandraObject::Base>] an array of objects
+    # @param  [Hash] options the options with which to modify this query
+    # @option options [String]  :start_after the key after which to start returning results
+    # @option options [Boolean] :reversed (false or association default) return the results in reverse order
+    # @option options [Integer] :limit the max number of results to return
+    # @return [Array<CassandraObject::Base>] an array of objects of type self#target_class
     #
     def all(options = {})
       @association.find(@owner, options)
