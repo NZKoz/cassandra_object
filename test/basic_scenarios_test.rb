@@ -107,5 +107,13 @@ class BasicScenariosTest < CassandraObjectTestCase
     should "create a natural key based on that attr" do
       assert_equal "12345", @payment.key.to_s
     end
+
+    should "have a key equal to another object with that key" do
+      p = Payment.new(:reference_number => "12345",
+                      :amount           => 1001)
+      p.save
+
+      assert_equal @payment.key, p.key
+    end
   end
 end
