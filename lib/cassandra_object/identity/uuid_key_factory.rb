@@ -3,12 +3,12 @@ module CassandraObject
     # Key factories need to support 3 operations
     class UUIDKeyFactory < AbstractKeyFactory
       class UUID < Cassandra::UUID
-        # to_param should return a nice-readable representation of the key suitable to chuck into URLs
+        include Key
+
         def to_param
           to_guid
         end
         
-        # to_s should return the bytes which will be written to cassandra both as keys and values for associations.
         def to_s
           # FIXME - this should probably write the raw bytes 
           # but it's very hard to debug without this for now.
