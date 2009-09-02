@@ -80,6 +80,13 @@ class BasicScenariosTest < CassandraObjectTestCase
     assert_equal invoice.key, Invoice.parse_key(param)
   end
   
+  test "setting a column_family" do
+    class Foo < CassandraObject::Base
+      self.column_family = 'Bar'
+    end
+    assert_equal 'Bar'.pluralize, Foo.column_family
+  end
+
   context "destroying a customer with invoices" do
     setup do
       @invoice = mock_invoice

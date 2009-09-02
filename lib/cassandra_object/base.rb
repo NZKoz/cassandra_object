@@ -23,27 +23,27 @@ module CassandraObject
       end
     end
     extend ConnectionManagement
-    
+
     module Naming
+      def column_family=(column_family)
+        @column_family = column_family
+      end
+
       def column_family
-        name.pluralize
+        (@column_family || name).pluralize
       end
     end
     extend Naming
-    
+
     include Callbacks
     include Identity
     include Attributes
     include Persistence
     include Indexes
     include Dirty
-    
 
     include Validation
     include Associations
-    
-
-
 
     attr_reader :key, :attributes
 
