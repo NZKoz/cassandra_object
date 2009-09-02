@@ -30,7 +30,7 @@ module CassandraObject
       end
 
       def column_family
-        (@column_family || name).pluralize
+        @column_family || name.pluralize
       end
     end
     extend Naming

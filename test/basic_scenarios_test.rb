@@ -84,7 +84,7 @@ class BasicScenariosTest < CassandraObjectTestCase
     class Foo < CassandraObject::Base
       self.column_family = 'Bar'
     end
-    assert_equal 'Bar'.pluralize, Foo.column_family
+    assert_equal 'Bar', Foo.column_family
   end
 
   context "destroying a customer with invoices" do
