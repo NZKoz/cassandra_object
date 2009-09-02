@@ -1,3 +1,5 @@
+require 'active_support/core_ext/object/tap'
+
 module CassandraObject
   module Dirty
     extend ActiveSupport::Concern
