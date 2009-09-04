@@ -134,4 +134,17 @@ class BasicScenariosTest < CassandraObjectTestCase
       e = Empty.new
     end
   end
+
+  context "A model that allows nils" do
+    setup do
+      class Nilable < CassandraObject::Base
+        attribute :user_id, :type => Integer, :allow_nil => true
+      end
+    end
+
+    should "should be valid with a nil" do
+      n = Nilable.new
+      assert n.valid?
+    end
+  end
 end

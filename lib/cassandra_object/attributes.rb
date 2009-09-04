@@ -59,7 +59,7 @@ module CassandraObject
     
     def append_validations!
       if f = FORMATS[expected_type]
-        @owner_class.validates_format_of @name, :with=>f, :unless => lambda {|obj| obj.send(name).is_a? expected_type }
+        @owner_class.validates_format_of @name, :with => f, :unless => lambda {|obj| obj.send(name).is_a? expected_type }, :allow_nil => @options[:allow_nil]
       end
     end
 
