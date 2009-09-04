@@ -123,4 +123,15 @@ class BasicScenariosTest < CassandraObjectTestCase
       assert_equal @payment.key, p.key
     end
   end
+
+  context "Model with no attributes" do
+    setup do
+      class Empty < CassandraObject::Base
+      end
+    end
+
+    should "work" do
+      e = Empty.new
+    end
+  end
 end

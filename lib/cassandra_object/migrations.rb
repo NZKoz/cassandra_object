@@ -6,6 +6,7 @@ module CassandraObject
       self.migration_column_name = :schema_version
       class_inheritable_array :migrations
       class_inheritable_accessor :current_schema_version
+      self.current_schema_version = 0
     end
     
     class Migration
@@ -28,7 +29,7 @@ module CassandraObject
     
     module InstanceMethods
       def schema_version
-        Integer(@attributes[:schema_version] || self.class.current_schema_version)
+        Integer(@schema_version || self.class.current_schema_version)
       end
     end
     
@@ -36,7 +37,7 @@ module CassandraObject
       def migrate(version, &blk)
         write_inheritable_array(:migrations, [Migration.new(version, blk)])
         
-        if current_schema_version.nil? || version > self.current_schema_version 
+        if version > self.current_schema_version 
           self.current_schema_version = version
         end
       end
@@ -44,10 +45,7 @@ module CassandraObject
       def instantiate(key, attributes)
         original_attributes = attributes.dup
         version = attributes[migration_column_name.to_s]
-        if version.nil?
-          # WTF do I do here? Assume 0 for now but seems wrongsauce?
-          version = 0
-        elsif current_schema_version.nil? || version == current_schema_version
+        if version == current_schema_version
           return super(key, attributes)
         end
         

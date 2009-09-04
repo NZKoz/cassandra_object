@@ -51,28 +51,28 @@ module CassandraObject
         end
       end
 
-      def write(key, attributes)
+      def write(key, attributes, schema_version)
         returning(key || next_key(attributes)) do |key|
-          connection.insert(column_family, key.to_s, encode_attributes_hash(attributes))
+          connection.insert(column_family, key.to_s, encode_columns_hash(attributes, schema_version))
         end
       end
 
       def instantiate(key, attributes)
         returning allocate do |object|
+          object.instance_variable_set("@schema_version", attributes.delete('schema_version'))
           object.instance_variable_set("@key", parse_key(key))
-          object.instance_variable_set("@attributes", decode_attributes_hash(attributes).with_indifferent_access)
-          object.write_attribute(:schema_version, object.schema_version)
+          object.instance_variable_set("@attributes", decode_columns_hash(attributes).with_indifferent_access)
         end
       end
       
-      def encode_attributes_hash(attributes)
-        attributes.inject(Hash.new) do |memo, (column_name, value)|
+      def encode_columns_hash(attributes, schema_version)
+        (attributes.merge({:schema_version => schema_version})).inject(Hash.new) do |memo, (column_name, value)|
           memo[column_name.to_s] = ActiveSupport::JSON.encode(value)
           memo
         end
       end
       
-      def decode_attributes_hash(attributes)
+      def decode_columns_hash(attributes)
         attributes.inject(Hash.new) do |memo, (column_name, value)|
           memo[column_name.to_s] = ActiveSupport::JSON.decode(value)
           memo
@@ -88,7 +88,7 @@ module CassandraObject
         run_callbacks :before_save
 
         changed_attributes = changed.inject({}) { |h, n| h[n] = read_attribute(n); h }
-        returned_key = self.class.write(key, changed_attributes)
+        returned_key = self.class.write(key, changed_attributes, schema_version)
         @key ||= returned_key
         run_callbacks :after_save
         run_callbacks :after_create if was_new_record
