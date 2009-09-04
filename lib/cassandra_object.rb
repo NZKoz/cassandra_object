@@ -6,9 +6,9 @@ $LOAD_PATH << vendor + "/activesupport/lib"
 
 require 'activesupport'
 require 'activemodel'
-require 'json'
 require 'active_support/concern'
 require 'cassandra_object/base'
+require 'active_support/core_ext/array/wrap'
 
 module CassandraObject
 end
