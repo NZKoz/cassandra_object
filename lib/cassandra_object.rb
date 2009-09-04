@@ -10,6 +10,8 @@ require 'active_support/concern'
 require 'cassandra_object/base'
 require 'active_support/core_ext/array/wrap'
 
+require 'I18n' unless defined?(:I18n)
+
 module CassandraObject
 end
 
