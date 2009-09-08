@@ -52,7 +52,7 @@ module CassandraObject
       end
 
       def write(key, attributes, schema_version)
-        returning(key || next_key(attributes)) do |key|
+        returning(key) do |key|
           connection.insert(column_family, key.to_s, encode_columns_hash(attributes, schema_version))
         end
       end
@@ -88,8 +88,8 @@ module CassandraObject
         run_callbacks :before_save
 
         changed_attributes = changed.inject({}) { |h, n| h[n] = read_attribute(n); h }
-        returned_key = self.class.write(key, changed_attributes, schema_version)
-        @key ||= returned_key
+        @key ||= self.class.next_key(self)
+        self.class.write(key, changed_attributes, schema_version)
         run_callbacks :after_save
         run_callbacks :after_create if was_new_record
         @new_record = false

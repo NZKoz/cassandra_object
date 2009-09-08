@@ -35,7 +35,7 @@ module CassandraObject
       end
 
       def next_key(object)
-        NaturalKey.new(attributes.map { |a| object[a.to_s] }.join(separator))
+        NaturalKey.new(attributes.map { |a| object.attributes[a.to_s] }.join(separator))
       end
 
       def parse(paramized_key)

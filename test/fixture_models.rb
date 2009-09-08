@@ -52,3 +52,8 @@ class Payment < CassandraObject::Base
 end
 
 MockRecord = Struct.new(:key)
+
+class Person < CassandraObject::Base
+  attribute :name, :type => String
+  attribute :age,  :type => Integer
+end
