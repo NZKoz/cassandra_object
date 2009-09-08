@@ -14,12 +14,14 @@ module CassandraObject
       # @param [:uuid, :natural] the type of key
       # @param the options you want to pass along to the key factory (like :attributes => :name, for a natural key).
       # 
-      def key(name = :uuid, *options)
+      def key(name_or_factory = :uuid, *options)
         @key_factory = case name
         when :uuid
           UUIDKeyFactory.new
         when :natural
           NaturalKeyFactory.new(*options)
+        else
+          name_or_factory
         end
       end
     
@@ -33,7 +35,7 @@ module CassandraObject
     end
     
     module InstanceMethods
-      
+
       def ==(comparison_object)
         comparison_object.equal?(self) ||
           (comparison_object.instance_of?(self.class) &&

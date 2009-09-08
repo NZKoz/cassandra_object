@@ -45,7 +45,8 @@ module CassandraObject
     include Validation
     include Associations
 
-    attr_reader :key, :attributes
+    attr_reader :attributes
+    attr_accessor :key
 
     include Serialization
     include Migrations
