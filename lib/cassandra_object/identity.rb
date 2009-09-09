@@ -15,7 +15,7 @@ module CassandraObject
       # @param the options you want to pass along to the key factory (like :attributes => :name, for a natural key).
       # 
       def key(name_or_factory = :uuid, *options)
-        @key_factory = case name
+        @key_factory = case name_or_factory
         when :uuid
           UUIDKeyFactory.new
         when :natural
