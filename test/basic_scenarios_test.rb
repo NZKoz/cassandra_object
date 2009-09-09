@@ -147,4 +147,24 @@ class BasicScenariosTest < CassandraObjectTestCase
       assert n.valid?
     end
   end
+
+  context "A janky custom key factory" do
+    setup do 
+      class JankyKeys
+        def next_key(object)
+          nil
+        end
+      end
+      class JankyObject < CassandraObject::Base
+        key JankyKeys.new
+      end
+      @object = JankyObject.new
+    end
+
+    should "raise an error on nil key" do
+      assert_raises(RuntimeError) do
+        @object.save
+      end
+    end
+  end
 end

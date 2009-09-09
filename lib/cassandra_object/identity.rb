@@ -26,7 +26,9 @@ module CassandraObject
       end
     
       def next_key(object = nil)
-        @key_factory.next_key(object)
+        returning(@key_factory.next_key(object)) do |key|
+          raise "Keys may not be nil" if key.nil?
+        end
       end
       
       def parse_key(string)
