@@ -19,7 +19,11 @@ module CassandraObject
       end
       
       def remove(key)
-        connection.remove("#{name}Relationships", key.to_s)
+        begin
+          connection.remove("#{name}Relationships", key.to_s)
+        rescue Cassandra::AccessError => e
+          raise e unless e.message =~ /Invalid column family/
+        end
         super
       end
     end
