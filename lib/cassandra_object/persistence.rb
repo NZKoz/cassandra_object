@@ -24,10 +24,10 @@ module CassandraObject
         attribute_results = connection.multi_get(column_family, keys.map(&:to_s), :count=>limit, :consistency=>consistency)
         
         attribute_results.inject(ActiveSupport::OrderedHash.new) do |memo, (key, attributes)|
-          memo[key] = if attributes.empty?
-            nil
+          if attributes.empty?
+            memo[key] = nil
           else
-            instantiate(key, attributes)
+            memo[parse_key(key)] = instantiate(key, attributes)
           end
           memo
         end
