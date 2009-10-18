@@ -6,15 +6,19 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |s|
     s.name = "cassandra_object"
-    s.summary = "ORM for interacting with Cassandra."
-    s.email = ""
-    s.homepage = ""
-    s.description = ""
+    s.summary = "Maps your objects into cassandra."
+    s.email = "michael@koziarski.com"
+    s.homepage = "http://github.com/NZKoz/cassandra_object"
+    s.description = "Gives you most of the familiarity of ActiveRecord, but with the scalability of cassandra."
     s.authors = ["Michael Koziarski"]
     file_list = FileList.new("[A-Z]*.*", "{bin,generators,lib,test,spec,rails,vendor}/**/*") do |f|
     end
     s.files = file_list
+    s.add_dependency('activesupport', '>= 3.0.pre')
+    s.add_dependency('activemodel',   '>= 3.0.pre')
+    
   end
+  Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
 end
