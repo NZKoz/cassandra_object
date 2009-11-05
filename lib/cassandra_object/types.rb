@@ -65,4 +65,16 @@ module CassandraObject
     end
     module_function :decode
   end
+
+  module StringType
+    def encode(str)
+      str
+    end
+    module_function :encode
+
+    def decode(str)
+      str
+    end
+    module_function :decode
+  end
 end
