@@ -1,23 +1,36 @@
+ActiveSupport::JSON::Encoding.use_standard_json_time_format = true
+
 module CassandraObject
   class Attribute
     FORMATS = {}
-    FORMATS[Date] = /^\d{4}\/\d{2}\/\d{2}$/
+    FORMATS[Date]    = /^\d{4}\/\d{2}\/\d{2}$/
     FORMATS[Integer] = /^-?\d+$/
     FORMATS[Float]   = /^-?\d*\.\d*$/
-    
+    FORMATS[Time]    = /\A\s*
+              -?\d+-\d\d-\d\d
+              T
+              \d\d:\d\d:\d\d
+              (\.\d*)?
+              (Z|[+-]\d\d:\d\d)?
+              \s*\z/ix # lifted from the implementation of Time.xmlschema
+
     CONVERTERS = {}
     CONVERTERS[Date] = Proc.new do |str|
       Date.strptime(str, "%Y/%m/%d")
     end
-    
+
     CONVERTERS[Integer] = Proc.new do |str|
       Integer(str)
     end
-    
+
     CONVERTERS[Float] = Proc.new do |str|
       Float(str)
     end
-    
+
+    CONVERTERS[Time] = Proc.new do |str|
+      Time.xmlschema(str)
+    end
+
     attr_reader :name
     def initialize(name, owner_class, options)
       @name = name.to_s
@@ -27,7 +40,7 @@ module CassandraObject
       append_validations!
       define_methods!
     end
-  
+
     # I think this should live somewhere in Amo
     def check_value!(value)
       # Allow nil and Strings to fall back on the validations for typecasting
@@ -42,11 +55,11 @@ module CassandraObject
         raise TypeError, "Expected #{expected_type.inspect} but got #{value.inspect}"
       end
     end
-  
+
     def expected_type
       @options[:type] || String
     end
-    
+
     def type_cast(value)
       if value.is_a?(expected_type)
         value
@@ -56,7 +69,7 @@ module CassandraObject
         value
       end
     end
-    
+
     def append_validations!
       if f = FORMATS[expected_type]
         @owner_class.validates_format_of @name, :with => f, :unless => lambda {|obj| obj.send(name).is_a? expected_type }, :allow_nil => @options[:allow_nil]
