@@ -2,7 +2,7 @@ require 'test_helper'
 
 class TypesTest < CassandraObjectTestCase
   context "IntegerType" do
-    context "#encode" do
+    context "encode" do
 
       should "return an int with no errors" do
         assert_nothing_raised {
@@ -31,7 +31,7 @@ class TypesTest < CassandraObjectTestCase
       end
     end
 
-    context "#decode" do
+    context "decode" do
       should "work with an int" do
         assert_nothing_raised {
           assert_equal 12, CassandraObject::IntegerType.decode('12')
@@ -54,7 +54,7 @@ class TypesTest < CassandraObjectTestCase
   end
 
   context "FloatType" do
-    context "#encode" do
+    context "encode" do
       should "should reject an Integer" do
         assert_raises(ArgumentError) {
           CassandraObject::FloatType.encode(1)
@@ -72,7 +72,7 @@ class TypesTest < CassandraObjectTestCase
       end
     end
 
-    context "#decode" do
+    context "decode" do
       should "reject a non-float" do
         assert_raises(ArgumentError) {
           CassandraObject::FloatType.decode('asdf')
@@ -156,6 +156,30 @@ class TypesTest < CassandraObjectTestCase
         time = Time.xmlschema(str = "2009-11-05T13:24:07Z")
         assert_nothing_raised {
           assert_equal time, CassandraObject::TimeType.decode(str)
+        }
+      end
+    end
+  end
+
+  context "HashType" do
+    context "encode" do
+      should "handle an empty Hash" do
+        assert_nothing_raised {
+          assert_equal({}.to_json, CassandraObject::HashType.encode({}))
+        }
+      end
+
+      should "handle string keys" do
+        assert_nothing_raised {
+          h = {'foo' => 'bar'}
+          assert_equal(h.to_json, CassandraObject::HashType.encode(h))
+        }
+      end
+
+      should "handle symbol keys" do
+        assert_nothing_raised {
+          h = {:foo => 'bar'}
+          assert_equal(h.to_json, CassandraObject::HashType.encode(h))
         }
       end
     end

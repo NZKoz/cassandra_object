@@ -64,17 +64,17 @@ module CassandraObject
           object.instance_variable_set("@attributes", decode_columns_hash(attributes).with_indifferent_access)
         end
       end
-      
+
       def encode_columns_hash(attributes, schema_version)
-        (attributes.merge({:schema_version => schema_version})).inject(Hash.new) do |memo, (column_name, value)|
-          memo[column_name.to_s] = ActiveSupport::JSON.encode(value)
+        attributes.inject(Hash.new) do |memo, (column_name, value)|
+          memo[column_name.to_s] = model_attributes[column_name.to_sym].converter.encode(value)
           memo
-        end
+        end.merge({"schema_version" => schema_version.to_s})
       end
 
       def decode_columns_hash(attributes)
         attributes.inject(Hash.new) do |memo, (column_name, value)|
-          memo[column_name.to_s] = ActiveSupport::JSON.decode(value)
+          memo[column_name.to_s] = model_attributes[column_name.to_sym].converter.decode(value)
           memo
         end
       end

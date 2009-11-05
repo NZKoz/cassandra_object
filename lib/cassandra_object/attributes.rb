@@ -41,8 +41,13 @@ module CassandraObject
       define_methods!
     end
 
+    def converter
+      CassandraObject.const_get((expected_type.to_s + '_type').camelize)
+    end
+
     # I think this should live somewhere in Amo
     def check_value!(value)
+      converter.encode(value)
       # Allow nil and Strings to fall back on the validations for typecasting
       # Everything else gets checked with is_a?
       if value.nil?
