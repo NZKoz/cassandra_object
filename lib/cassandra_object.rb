@@ -4,7 +4,7 @@ vendor = File.expand_path(File.dirname(__FILE__) + "/../vendor")
 $LOAD_PATH << vendor + "/activemodel/lib"
 $LOAD_PATH << vendor + "/activesupport/lib"
 
-require 'I18n'
+require 'i18n'
 require 'activesupport'
 require 'activemodel'
 require 'active_support/concern'

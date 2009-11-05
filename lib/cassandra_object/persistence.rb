@@ -1,7 +1,7 @@
 module CassandraObject
   module Persistence
     extend ActiveSupport::Concern
-    
+
     module ClassMethods
       def get(key, options = {})
         multi_get([key], options).values.first
@@ -71,7 +71,7 @@ module CassandraObject
           memo
         end
       end
-      
+
       def decode_columns_hash(attributes)
         attributes.inject(Hash.new) do |memo, (column_name, value)|
           memo[column_name.to_s] = ActiveSupport::JSON.decode(value)
@@ -79,7 +79,7 @@ module CassandraObject
         end
       end
     end
-    
+
     module InstanceMethods
       def save
         if was_new_record = new_record?
