@@ -2,8 +2,6 @@ module CassandraObject
   module Migrations
     extend ActiveSupport::Concern
     included do
-      cattr_accessor :migration_column_name
-      self.migration_column_name = :schema_version
       class_inheritable_array :migrations
       class_inheritable_accessor :current_schema_version
       self.current_schema_version = 0
@@ -43,8 +41,8 @@ module CassandraObject
       end
       
       def instantiate(key, attributes)
+        version = attributes.delete('schema_version')
         original_attributes = attributes.dup
-        version = attributes[migration_column_name.to_s]
         if version == current_schema_version
           return super(key, attributes)
         end
@@ -61,7 +59,7 @@ module CassandraObject
         
         migrations_to_run.inject(attributes) do |attrs, migration|
           migration.run(attrs)
-          attrs[migration_column_name.to_s] = migration.version.to_s
+          @schema_version = migration.version.to_s
           attrs
         end
         

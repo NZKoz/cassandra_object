@@ -167,4 +167,12 @@ class BasicScenariosTest < CassandraObjectTestCase
       end
     end
   end
+
+  test "updating columns" do
+    appt = Appointment.new(:start_time => Time.now, :title => 'emergency meeting')
+    appt.save!
+    appt = Appointment.get(appt.key)
+    appt.start_time = Time.now + 1.hour
+    appt.save!
+  end
 end
