@@ -1,5 +1,3 @@
-ActiveSupport::JSON::Encoding.use_standard_json_time_format = true
-
 module CassandraObject
   class Attribute
 
@@ -17,7 +15,7 @@ module CassandraObject
     end
 
     def check_value!(value)
-      converter.encode(value)
+      converter.encode(value) unless value.nil? && @options[:allow_nil]
       value
     end
 

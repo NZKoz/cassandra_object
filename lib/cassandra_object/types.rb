@@ -1,12 +1,14 @@
 module CassandraObject
   module IntegerType
     def encode(int)
-      raise ArgumentError.new("#{self} requires an Integer") unless int.kind_of?(Integer)
+      return '' if int.nil?
+      raise ArgumentError.new("#{self} requires an Integer. You passed #{int.inspect}") unless int.kind_of?(Integer)
       int.to_s
     end
     module_function :encode
 
     def decode(str)
+      return nil if str.empty?
       raise ArgumentError.new("#{str} isn't a String that looks like a Integer") unless str.kind_of?(String) && str.match(/\A\d+\Z/)
       str.to_i
     end
@@ -15,12 +17,14 @@ module CassandraObject
 
   module FloatType
     def encode(float)
+      return '' if float.nil?
       raise ArgumentError.new("#{self} requires a Float") unless float.kind_of?(Float)
       float.to_s
     end
     module_function :encode
 
     def decode(str)
+      return nil if str == ''
       raise ArgumentError.new("#{str} isn't a String that looks like a Float") unless str.kind_of?(String) && str.match(/\A\d+(\.\d+)\Z/)
       str.to_f
     end
