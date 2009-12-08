@@ -70,6 +70,10 @@ class TypesTest < CassandraObjectTestCase
       should "return a string" do
         assert_equal '1.0', CassandraObject::FloatType.encode(1.0)
       end
+
+      should "accept a negative number" do
+        assert_equal '-1.0', CassandraObject::FloatType.encode(-1.0)
+      end
     end
 
     context "decode" do
@@ -81,6 +85,14 @@ class TypesTest < CassandraObjectTestCase
 
       should "work on a float" do
         assert_equal 1.2, CassandraObject::FloatType.decode('1.2')
+      end
+
+      should "work on a negative number" do
+        assert_equal -1.2, CassandraObject::FloatType.decode('-1.2')
+      end
+
+      should "work with a leading +" do
+        assert_equal 1.2, CassandraObject::FloatType.decode('+1.2')
       end
     end
   end
