@@ -16,7 +16,7 @@ module CassandraObject
   end
 
   module FloatType
-    REGEX = 
+    REGEX = /\A[-+]?\d+(\.\d+)\Z/
     def encode(float)
       return '' if float.nil?
       raise ArgumentError.new("#{self} requires a Float") unless float.kind_of?(Float)
