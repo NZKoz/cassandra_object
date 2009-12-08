@@ -1,5 +1,6 @@
 module CassandraObject
   module IntegerType
+    REGEX = /\A[-+]?\d+\Z/
     def encode(int)
       return '' if int.nil?
       raise ArgumentError.new("#{self} requires an Integer. You passed #{int.inspect}") unless int.kind_of?(Integer)
@@ -9,7 +10,7 @@ module CassandraObject
 
     def decode(str)
       return nil if str.empty?
-      raise ArgumentError.new("#{str} isn't a String that looks like a Integer") unless str.kind_of?(String) && str.match(/\A\d+\Z/)
+      raise ArgumentError.new("#{str} isn't a String that looks like a Integer") unless str.kind_of?(String) && str.match(REGEX)
       str.to_i
     end
     module_function :decode

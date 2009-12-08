@@ -50,6 +50,13 @@ class TypesTest < CassandraObjectTestCase
         }
       end
 
+      should "work on a negative number" do
+        assert_equal -1, CassandraObject::IntegerType.decode('-1')
+      end
+
+      should "work with a leading +" do
+        assert_equal 1, CassandraObject::IntegerType.decode('+1')
+      end
     end
   end
 
