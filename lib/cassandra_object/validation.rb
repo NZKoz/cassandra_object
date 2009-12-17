@@ -25,8 +25,12 @@ module CassandraObject
     end
     
     module InstanceMethods
-      def save
+      def valid?
         run_callbacks :before_validation
+        super
+      end
+
+      def save
         if valid?
           super
         else
