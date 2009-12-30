@@ -6,7 +6,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
     setup do
       @customer = Customer.create :first_name    => "Michael",
                                   :last_name     => "Koziarski",
-                                  :date_of_birth => "1980/08/15"
+                                  :date_of_birth => "1980-08-15"
 
       assert @customer.valid?, @customer.errors                            
 
@@ -78,7 +78,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
     setup do
       @customer = Customer.create! :first_name    => "Michael",
                                    :last_name     => "Koziarski",
-                                   :date_of_birth => "1980/08/15"
+                                   :date_of_birth => "1980-08-15"
       @invoice = @customer.invoices.create :number=>50, :total=>25.0
     end
     
@@ -100,7 +100,7 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
     setup do
       @customer = Customer.create! :first_name    => "Michael",
                                    :last_name     => "Koziarski",
-                                   :date_of_birth => "1980/08/15"
+                                   :date_of_birth => "1980-08-15"
       @first  = @customer.invoices.create :number => 50, :total => 25.0
       @second = @customer.invoices.create :number => 50, :total => 25.0
     end

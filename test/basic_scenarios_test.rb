@@ -5,7 +5,7 @@ class BasicScenariosTest < CassandraObjectTestCase
     super
     @customer = Customer.create :first_name    => "Michael",
                                 :last_name     => "Koziarski",
-                                :date_of_birth => "1980/08/15"
+                                :date_of_birth => "1980-08-15"
     @customer_key = @customer.key.to_s                          
     
     assert @customer.valid?
@@ -107,7 +107,7 @@ class BasicScenariosTest < CassandraObjectTestCase
   context "An object with a natural key" do
     setup do
       @payment = Payment.new :reference_number => "12345",
-                             :amount           => 1001
+                             :amount           => 1001.6
       @payment.save!
     end
 
@@ -117,7 +117,7 @@ class BasicScenariosTest < CassandraObjectTestCase
 
     should "have a key equal to another object with that key" do
       p = Payment.new(:reference_number => "12345",
-                      :amount           => 1001)
+                      :amount           => 1001.6)
       p.save
 
       assert_equal @payment.key, p.key
@@ -138,7 +138,7 @@ class BasicScenariosTest < CassandraObjectTestCase
   context "A model that allows nils" do
     setup do
       class Nilable < CassandraObject::Base
-        attribute :user_id, :type => Integer, :allow_nil => true
+        attribute :user_id, :type => :integer, :allow_nil => true
       end
     end
 
