@@ -1,3 +1,4 @@
+require 'pp'
 require 'rubygems'
 require 'cassandra_object'
 require 'connection'
@@ -5,7 +6,6 @@ require 'connection'
 require 'test/unit'
 require 'active_support/test_case'
 require 'fixture_models'
-require 'pp'
 require 'Shoulda'
 
 class CassandraObjectTestCase < ActiveSupport::TestCase

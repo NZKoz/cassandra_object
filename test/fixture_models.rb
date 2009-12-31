@@ -1,9 +1,22 @@
+module ReverseStorage
+  def encode(str)
+    str.reverse
+  end
+  module_function :encode
+  
+  def decode(str)
+    str.reverse
+  end
+  module_function :decode
+end
+
 
 class Customer < CassandraObject::Base
-  attribute :first_name,    :type => String
-  attribute :last_name,     :type => String
-  attribute :date_of_birth, :type => Date
-  attribute :preferences,   :type => Hash
+  attribute :first_name,     :type => :string
+  attribute :last_name,      :type => :string
+  attribute :date_of_birth,  :type => :date
+  attribute :preferences,    :type => :hash
+  attribute :custom_storage, :type => String, :converter=>ReverseStorage
   
   validate :should_be_cool
 
@@ -23,9 +36,9 @@ class Customer < CassandraObject::Base
 end
 
 class Invoice < CassandraObject::Base
-  attribute :number, :type=>Integer
-  attribute :total, :type=>Float
-  attribute :gst_number, :type=>String
+  attribute :number,     :type=>:integer
+  attribute :total,      :type=>:float
+  attribute :gst_number, :type=>:string
   
   index :number, :unique=>true
   
@@ -43,8 +56,8 @@ class Invoice < CassandraObject::Base
 end
 
 class Payment < CassandraObject::Base
-  attribute :reference_number, :type => String
-  attribute :amount,           :type => Integer
+  attribute :reference_number, :type => :string
+  attribute :amount,           :type => :integer
 
   key :natural, :attributes => :reference_number
 end
@@ -52,14 +65,14 @@ end
 MockRecord = Struct.new(:key)
 
 class Person < CassandraObject::Base
-  attribute :name, :type => String
-  attribute :age,  :type => Integer
+  attribute :name, :type => :string
+  attribute :age,  :type => :integer
 end
 
 class Appointment < CassandraObject::Base
-  attribute :title,      :type => String
-  attribute :start_time, :type => Time
-  attribute :end_time,   :type => ActiveSupport::TimeWithZone, :allow_nil => true
+  attribute :title,      :type => :string
+  attribute :start_time, :type => :time
+  attribute :end_time,   :type => :time_with_zone, :allow_nil => true
   
   key :natural, :attributes => :title
 end

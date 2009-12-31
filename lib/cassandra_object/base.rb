@@ -62,3 +62,5 @@ module CassandraObject
     end
   end
 end
+
+require 'cassandra_object/type_registration'

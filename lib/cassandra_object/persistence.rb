@@ -67,14 +67,14 @@ module CassandraObject
 
       def encode_columns_hash(attributes, schema_version)
         attributes.inject(Hash.new) do |memo, (column_name, value)|
-          memo[column_name.to_s] = model_attributes[column_name.to_sym].converter.encode(value)
+          memo[column_name.to_s] = model_attributes[column_name].converter.encode(value)
           memo
         end.merge({"schema_version" => schema_version.to_s})
       end
 
       def decode_columns_hash(attributes)
         attributes.inject(Hash.new) do |memo, (column_name, value)|
-          memo[column_name.to_s] = model_attributes[column_name.to_sym].converter.decode(value)
+          memo[column_name.to_s] = model_attributes[column_name].converter.decode(value)
           memo
         end
       end

@@ -177,4 +177,15 @@ class BasicScenariosTest < CassandraObjectTestCase
     appt.save!
     assert appt.reload.end_time.is_a?(ActiveSupport::TimeWithZone)
   end
+  
+  test "Saving a class with custom attributes uses the custom converter" do
+    @customer.custom_storage = "hello"
+    @customer.save
+
+    raw_result = Customer.connection.get("Customers", @customer.key.to_s)
+    
+    assert_equal "olleh", raw_result["custom_storage"]
+    assert_equal "hello", @customer.reload.custom_storage
+    
+  end
 end
