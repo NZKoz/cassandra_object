@@ -61,7 +61,7 @@ module CassandraObject
 
     def encode(time)
       raise ArgumentError.new("#{self} requires a Time") unless time.kind_of?(Time)
-      time.xmlschema
+      time.xmlschema(6)
     end
     module_function :encode
 

@@ -27,6 +27,6 @@ class TimeTest < CassandraObjectTestCase
     appt2 = Appointment.get(appt.key)
 
     assert_equal appt.start_time.class, appt2.start_time.class
-    assert_equal appt.start_time.to_i,       appt2.start_time.to_i
+    assert_equal appt.start_time,       appt2.start_time
   end
 end
