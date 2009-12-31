@@ -71,7 +71,19 @@ module CassandraObject
     end
     module_function :decode
   end
+  
+  module TimeWithZoneType
+    def encode(time)
+      TimeType.encode(time.utc)
+    end
+    module_function :encode
 
+    def decode(str)
+      TimeType.decode(str).in_time_zone
+    end
+    module_function :decode
+  end
+  
   module StringType
     def encode(str)
       raise ArgumentError.new("#{self} requires a String") unless str.kind_of?(String)

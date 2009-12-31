@@ -173,6 +173,8 @@ class BasicScenariosTest < CassandraObjectTestCase
     appt.save!
     appt = Appointment.get(appt.key)
     appt.start_time = Time.now + 1.hour
+    appt.end_time = Time.now.utc +  5.hours
     appt.save!
+    assert appt.reload.end_time.is_a?(ActiveSupport::TimeWithZone)
   end
 end

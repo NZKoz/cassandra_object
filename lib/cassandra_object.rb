@@ -8,6 +8,7 @@ require 'i18n'
 require 'active_support'
 require 'active_model'
 require 'active_support/concern'
+require 'active_support/time_with_zone'
 require 'cassandra_object/base'
 require 'active_support/core_ext/array/wrap'
 

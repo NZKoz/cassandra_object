@@ -11,7 +11,7 @@ module CassandraObject
     end
 
     def converter
-      CassandraObject.const_get((expected_type.to_s + '_type').camelize)
+      "CassandraObject::#{expected_type.to_s.gsub(/.*::/, '')}Type".constantize
     end
 
     def check_value!(value)

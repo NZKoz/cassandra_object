@@ -105,6 +105,11 @@ module CassandraObject
         self.class.remove(key)
         run_callbacks :after_destroy
       end
+      
+      def reload
+        self.class.get(self.key)
+      end
+      
     end
   end
 end

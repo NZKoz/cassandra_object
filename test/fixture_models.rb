@@ -59,7 +59,7 @@ end
 class Appointment < CassandraObject::Base
   attribute :title,      :type => String
   attribute :start_time, :type => Time
-  attribute :end_time,   :type => Time, :allow_nil => true
+  attribute :end_time,   :type => ActiveSupport::TimeWithZone, :allow_nil => true
   
   key :natural, :attributes => :title
 end
