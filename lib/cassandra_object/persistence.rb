@@ -66,15 +66,15 @@ module CassandraObject
       end
       
       def encode_columns_hash(attributes, schema_version)
-        attributes.inject(Hash.new) do |memo, (column_name, value)|
-          memo[column_name.to_s] = model_attributes[column_name].serialize(value)
+        (attributes.merge({:schema_version => schema_version})).inject(Hash.new) do |memo, (column_name, value)|
+          memo[column_name.to_s] = ActiveSupport::JSON.encode(value)
           memo
-        end.merge({"schema_version" => schema_version.to_s})
+        end
       end
 
       def decode_columns_hash(attributes)
         attributes.inject(Hash.new) do |memo, (column_name, value)|
-          memo[column_name.to_s] = model_attributes[column_name].parse(value)
+          memo[column_name.to_s] = ActiveSupport::JSON.decode(value)
           memo
         end
       end
