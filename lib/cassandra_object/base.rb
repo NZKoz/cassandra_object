@@ -12,6 +12,7 @@ require 'cassandra_object/associations'
 require 'cassandra_object/migrations'
 require 'cassandra_object/cursor'
 require 'cassandra_object/collection'
+require 'cassandra_object/types'
 
 module CassandraObject
   class Base

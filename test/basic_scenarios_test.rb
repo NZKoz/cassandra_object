@@ -5,12 +5,12 @@ class BasicScenariosTest < CassandraObjectTestCase
     super
     @customer = Customer.create :first_name    => "Michael",
                                 :last_name     => "Koziarski",
-                                :date_of_birth => "1980/08/15"
+                                :date_of_birth => Date.parse("1980/08/15")
     @customer_key = @customer.key.to_s                          
-    
+
     assert @customer.valid?
   end
-  
+
   test "get on a non-existent key returns nil" do
     assert_nil Customer.get("THIS IS NOT A KEY")
   end
@@ -23,14 +23,14 @@ class BasicScenariosTest < CassandraObjectTestCase
     assert_equal "Koziarski", other_customer.last_name
     assert_equal Date.parse("1980-08-15"), other_customer.date_of_birth
   end
-  
+
   test "date_of_birth is a date" do
     assert @customer.date_of_birth.is_a?(Date)
   end
-  
+
   test "should not let you assign junk to a date column" do
-    assert_raise(TypeError) do
-      @customer.date_of_birth=24.5
+    assert_raise(ArgumentError) do
+      @customer.date_of_birth = 24.5
     end
   end
   
@@ -49,9 +49,9 @@ class BasicScenariosTest < CassandraObjectTestCase
   end
 
   test "should validate strings passed to a typed column" do
-    @customer.date_of_birth = "35345908"
-    assert !@customer.valid?
-    assert @customer.errors[:date_of_birth]
+    assert_raises(ArgumentError){
+      @customer.date_of_birth = "35345908"
+    }
   end
   
   test "should have a schema version of 0" do
@@ -166,5 +166,13 @@ class BasicScenariosTest < CassandraObjectTestCase
         @object.save
       end
     end
+  end
+
+  test "updating columns" do
+    appt = Appointment.new(:start_time => Time.now, :title => 'emergency meeting')
+    appt.save!
+    appt = Appointment.get(appt.key)
+    appt.start_time = Time.now + 1.hour
+    appt.save!
   end
 end

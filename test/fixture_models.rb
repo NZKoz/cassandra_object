@@ -20,8 +20,6 @@ class Customer < CassandraObject::Base
       errors.add(:first_name, "must be that of a cool person")
     end
   end
-
-
 end
 
 class Invoice < CassandraObject::Base

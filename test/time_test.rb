@@ -6,8 +6,8 @@ class TimeTest < CassandraObjectTestCase
     begin
       appt = Appointment.new :start_time => 1
       flunk "Should have failed to save"
-    rescue TypeError => e
-      assert_equal "Expected Time but got 1", e.message
+    rescue ArgumentError => e
+      assert_equal "CassandraObject::TimeType requires a Time", e.message
     end
   end
 
@@ -16,8 +16,8 @@ class TimeTest < CassandraObjectTestCase
       appt = Appointment.new
       appt.start_time = 1
       flunk "Should have failed to save"
-    rescue TypeError => e
-      assert_equal "Expected Time but got 1", e.message
+    rescue ArgumentError => e
+      assert_equal "CassandraObject::TimeType requires a Time", e.message
     end
   end
 
@@ -27,6 +27,6 @@ class TimeTest < CassandraObjectTestCase
     appt2 = Appointment.get(appt.key)
 
     assert_equal appt.start_time.class, appt2.start_time.class
-    assert_equal appt.start_time.to_i,       appt2.start_time.to_i
+    assert_equal appt.start_time,       appt2.start_time
   end
 end
