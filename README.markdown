@@ -1,15 +1,25 @@
-Provides a nice API for cassandra backed storage.  Because I'm too lazy to write docs for something so new, here is an example:
+# Cassandra Object
+
+Cassandra Object provides a nice API for working with [Cassandra](http://incubator.apache.org/cassandra/). CassandraObjects are mostly duck-type compatible with ActiveRecord objects so most of your controller code should work ok.  Note that they're *mostly* compatible, Cassandra has no support for dynamic queries, or sorting.  So the following kinds of operations aren't supported and *never will be*.
+
+* `:order`
+* `:conditions`
+* `:joins`
+* `:group`
+
+There isn't much in the way of documentation yet, but a few examples.
 
         class Customer < CassandraObject::Base
-          attribute :first_name,    :type => String
-          attribute :last_name,     :type => String
-          attribute :date_of_birth, :type => Date
-  
+          attribute :first_name,    :type => :string
+          attribute :last_name,     :type => :string
+          attribute :date_of_birth, :type => :date
+          attribute :signed_up_at,  :type => :time_with_zone
+    
           validate :should_be_cool
-
+    
           key :uuid
   
-          index :last_name
+          index :date_of_birth
   
           association :invoices, :unique=>false, :inverse_of=>:customer
 
@@ -20,19 +30,20 @@ Provides a nice API for cassandra backed storage.  Because I'm too lazy to write
               errors.add(:first_name, "must be that of a cool person")
             end
           end
-
-
         end
 
         class Invoice < CassandraObject::Base
-          attribute :number, :type=>Integer
-          attribute :total, :type=>Float
-          attribute :gst_number, :type=>String
+          attribute :number, :type=>:integer
+          attribute :total, :type=>:float
+          attribute :gst_number, :type=>:string
   
+          # indexes can have a single entry also.
           index :number, :unique=>true
   
+          # bi-directional associations with read-repair support.
           association :customer, :unique=>true, :inverse_of=>:invoices
   
+          # Read migration support
           migrate 1 do |attrs|
             attrs["total"] ||= rand(2000) / 100.0
           end
@@ -41,15 +52,15 @@ Provides a nice API for cassandra backed storage.  Because I'm too lazy to write
             attrs["gst_number"] = "66-666-666"
           end
   
-          key do
-            ActiveSupport::SecureRandom.hex(64)
-          end
+          key :natural, :attributes => :number
         end
         
-FAQ
-===
+        @invoice = Invoice.get("12345")
+        @invoice.customer.invoices.all.include?(@invoice) # true
+        
+# FAQ
 
-# How do I make this work?
+## How do I make this work?
 
 Here are some basic directions:
 
@@ -66,7 +77,10 @@ Sorry, it's hard right now.  If you can't figure it out you should ask nzkoz for
 
 You need to have a checkout of edge rails in ../rails if you want to run the tests.
 
-# Should I use this in production?
+## Should I use this in production?
 
 Only if you're looking to help out with the development, there are a bunch of rough edges right now.
 
+## Why do you use a superclass and not a module.
+
+Because.
