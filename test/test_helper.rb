@@ -1,12 +1,15 @@
-require 'pp'
-require 'rubygems'
+require 'vendor/gems/environment'
+
 require 'cassandra_object'
 require 'connection'
 
 require 'test/unit'
 require 'active_support/test_case'
+require 'shoulda'
+
 require 'fixture_models'
-require 'Shoulda'
+require 'pp'
+
 
 class CassandraObjectTestCase < ActiveSupport::TestCase
   def teardown

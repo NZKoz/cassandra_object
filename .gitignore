@@ -1,4 +1,6 @@
 pkg
-cassandra_object.gemspec
 .yardoc
 doc/
+bin/*
+vendor/gems/*
+!vendor/gems/cache/

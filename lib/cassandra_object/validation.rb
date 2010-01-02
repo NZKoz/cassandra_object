@@ -12,10 +12,10 @@ module CassandraObject
       end
     end
     extend ActiveSupport::Concern
-    depends_on ActiveModel::Validations
+    include ActiveModel::Validations
     
     included do
-      define_callbacks :before_validation
+      define_callbacks :validation
     end
     
     module ClassMethods
@@ -26,8 +26,9 @@ module CassandraObject
     
     module InstanceMethods
       def valid?
-        run_callbacks :before_validation
-        super
+        run_callbacks :validation do
+          super
+        end
       end
 
       def save

@@ -80,10 +80,12 @@ module CassandraObject
             
             after_save do |record|
               self.indexes[:#{attribute_name}].write(record)
+              true
             end
               
             after_destroy do |record|
               record.class.indexes[:#{attribute_name}].remove(record)
+              true
             end
           eom
         else
@@ -95,10 +97,12 @@ module CassandraObject
             
             after_save do |record|
               record.class.indexes[:#{attribute_name}].write(record)
+              true
             end
               
             after_destroy do |record|
               record.class.indexes[:#{attribute_name}].remove(record)
+              true
             end
           eom
         end

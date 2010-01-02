@@ -82,18 +82,24 @@ module CassandraObject
 
     module InstanceMethods
       def save
-        if was_new_record = new_record?
-          run_callbacks :before_create
+        if new_record?
+          run_callbacks :create do
+            _save
+          end
+        else
+          _save
         end
-        run_callbacks :before_save
-
-        changed_attributes = changed.inject({}) { |h, n| h[n] = read_attribute(n); h }
-        @key ||= self.class.next_key(self)
-        self.class.write(key, changed_attributes, schema_version)
-        run_callbacks :after_save
-        run_callbacks :after_create if was_new_record
+          
         @new_record = false
         true
+      end
+      
+      def _save
+        run_callbacks :save do
+          changed_attributes = changed.inject({}) { |h, n| h[n] = read_attribute(n); h }
+          @key ||= self.class.next_key(self)
+          self.class.write(key, changed_attributes, schema_version)
+        end
       end
 
       def new_record?
@@ -101,9 +107,9 @@ module CassandraObject
       end
       
       def destroy
-        run_callbacks :before_destroy
-        self.class.remove(key)
-        run_callbacks :after_destroy
+        run_callbacks :destroy do 
+          self.class.remove(key)
+        end
       end
       
       def reload
