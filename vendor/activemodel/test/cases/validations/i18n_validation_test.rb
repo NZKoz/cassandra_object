@@ -1,14 +1,12 @@
 require "cases/helper"
 require 'cases/tests_database'
-
 require 'models/person'
 
 class I18nValidationTest < ActiveModel::TestCase
   include ActiveModel::TestsDatabase
 
   def setup
-    reset_callbacks Person
-
+    Person.reset_callbacks(:validate)
     @person = Person.new
 
     @old_load_path, @old_backend = I18n.load_path, I18n.backend
@@ -18,29 +16,9 @@ class I18nValidationTest < ActiveModel::TestCase
   end
 
   def teardown
-    reset_callbacks Person
+    Person.reset_callbacks(:validate)
     I18n.load_path.replace @old_load_path
     I18n.backend = @old_backend
-  end
-
-  def reset_callbacks(*models)
-    models.each do |model|
-      model.instance_variable_set("@validate_callbacks", ActiveSupport::Callbacks::CallbackChain.new)
-    end
-  end
-
-  def test_percent_s_interpolation_syntax_in_error_messages_was_deprecated
-    assert_not_deprecated do
-      default = "%s interpolation syntax was deprecated"
-      assert_equal default, I18n.t(:does_not_exist, :default => default, :value => 'this')
-    end
-  end
-
-  def test_percent_d_interpolation_syntax_in_error_messages_was_deprecated
-    assert_not_deprecated do
-      default = "%d interpolation syntaxes are deprecated"
-      assert_equal default, I18n.t(:does_not_exist, :default => default, :count => 2)
-    end
   end
 
   def test_errors_add_on_empty_generates_message
@@ -61,6 +39,18 @@ class I18nValidationTest < ActiveModel::TestCase
   def test_errors_add_on_blank_generates_message_with_custom_default_message
     @person.errors.expects(:generate_message).with(:title, :blank, {:default => 'custom'})
     @person.errors.add_on_blank :title, 'custom'
+  end
+
+  def test_errors_full_messages_translates_human_attribute_name_for_model_attributes
+    @person.errors.add('name', 'empty')
+    I18n.expects(:translate).with(:"person.name", :default => ['Name', 'Name'], :scope => [:activemodel, :attributes], :count => 1).returns('Name')
+    @person.errors.full_messages
+  end
+
+  def test_errors_full_messages_uses_format
+    I18n.backend.store_translations('en', :activemodel => {:errors => {:format => "Field {{attribute}} {{message}}"}})
+    @person.errors.add('name', 'empty')
+    assert_equal ["Field Name empty"], @person.errors.full_messages
   end
 
   # ActiveRecord::Validations
@@ -104,32 +94,6 @@ class I18nValidationTest < ActiveModel::TestCase
   def test_validates_presence_of_generates_message_with_custom_default_message
     Person.validates_presence_of :title, :message => 'custom'
     @person.errors.expects(:generate_message).with(:title, :blank, {:default => 'custom'})
-    @person.valid?
-  end
-
-  def test_validates_length_of_within_generates_message_with_title_too_short
-    Person.validates_length_of :title, :within => 3..5
-    @person.errors.expects(:generate_message).with(:title, :too_short, {:count => 3, :default => nil})
-    @person.valid?
-  end
-
-  def test_validates_length_of_within_generates_message_with_title_too_short_and_custom_default_message
-    Person.validates_length_of :title, :within => 3..5, :too_short => 'custom'
-    @person.errors.expects(:generate_message).with(:title, :too_short, {:count => 3, :default => 'custom'})
-    @person.valid?
-  end
-
-  def test_validates_length_of_within_generates_message_with_title_too_long
-    Person.validates_length_of :title, :within => 3..5
-    @person.title = 'this title is too long'
-    @person.errors.expects(:generate_message).with(:title, :too_long, {:count => 5, :default => nil})
-    @person.valid?
-  end
-
-  def test_validates_length_of_within_generates_message_with_title_too_long_and_custom_default_message
-    Person.validates_length_of :title, :within => 3..5, :too_long => 'custom'
-    @person.title = 'this title is too long'
-    @person.errors.expects(:generate_message).with(:title, :too_long, {:count => 5, :default => 'custom'})
     @person.valid?
   end
 
@@ -280,7 +244,7 @@ class I18nValidationTest < ActiveModel::TestCase
     @person.valid?
   end
 
-  def test_validates_numericality_of_odd_generates_message_with_custom_default_message
+  def test_validates_numericality_of_less_than_odd_generates_message_with_custom_default_message
     Person.validates_numericality_of :title, :only_integer => true, :less_than => 0, :message => 'custom'
     @person.title = 1
     @person.errors.expects(:generate_message).with(:title, :less_than, {:value => 1, :count => 0, :default => 'custom'})
@@ -383,24 +347,6 @@ class I18nValidationTest < ActiveModel::TestCase
     @person.valid?
     assert_equal ['global message'], @person.errors[:title]
   end
-
-  def test_validates_length_of_is_finds_custom_model_key_translation
-    I18n.backend.store_translations 'en', :activemodel => {:errors => {:models => {:person => {:attributes => {:title => {:wrong_length => 'custom message'}}}}}}
-    I18n.backend.store_translations 'en', :activemodel => {:errors => {:messages => {:wrong_length => 'global message'}}}
-
-    Person.validates_length_of :title, :is => 5
-    @person.valid?
-    assert_equal ['custom message'], @person.errors[:title]
-  end
-
-  def test_validates_length_of_is_finds_global_default_translation
-    I18n.backend.store_translations 'en', :activemodel => {:errors => {:messages => {:wrong_length => 'global message'}}}
-
-    Person.validates_length_of :title, :is => 5
-    @person.valid?
-    assert_equal ['global message'], @person.errors[:title]
-  end
-
 
   # validates_format_of w/o mocha
 
@@ -544,6 +490,8 @@ class I18nValidationTest < ActiveModel::TestCase
     @person.valid?
     assert_equal ['global message'], @person.errors[:title]
   end
+
+  # test with validates_with
 
   def test_validations_with_message_symbol_must_translate
     I18n.backend.store_translations 'en', :activemodel => {:errors => {:messages => {:custom_error => "I am a custom error"}}}

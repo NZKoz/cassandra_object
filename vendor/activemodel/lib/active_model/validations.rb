@@ -1,7 +1,6 @@
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/core_ext/hash/keys'
-require 'active_support/concern'
-require 'active_support/callbacks'
+require 'active_model/errors'
 
 module ActiveModel
   module Validations
@@ -9,10 +8,34 @@ module ActiveModel
     include ActiveSupport::Callbacks
 
     included do
-      define_callbacks :validate
+      extend ActiveModel::Translation
+      define_callbacks :validate, :scope => :name
     end
 
     module ClassMethods
+      # Validates each attribute against a block.
+      #
+      #   class Person < ActiveRecord::Base
+      #     validates_each :first_name, :last_name do |record, attr, value|
+      #       record.errors.add attr, 'starts with z.' if value[0] == ?z
+      #     end
+      #   end
+      #
+      # Options:
+      # * <tt>:on</tt> - Specifies when this validation is active (default is <tt>:save</tt>, other options <tt>:create</tt>, <tt>:update</tt>).
+      # * <tt>:allow_nil</tt> - Skip validation if attribute is +nil+.
+      # * <tt>:allow_blank</tt> - Skip validation if attribute is blank.
+      # * <tt>:if</tt> - Specifies a method, proc or string to call to determine if the validation should
+      #   occur (e.g. <tt>:if => :allow_validation</tt>, or <tt>:if => Proc.new { |user| user.signup_step > 2 }</tt>).  The
+      #   method, proc or string should return or evaluate to a true or false value.
+      # * <tt>:unless</tt> - Specifies a method, proc or string to call to determine if the validation should
+      #   not occur (e.g. <tt>:unless => :skip_validation</tt>, or <tt>:unless => Proc.new { |user| user.signup_step <= 2 }</tt>).  The
+      #   method, proc or string should return or evaluate to a true or false value.
+      def validates_each(*attr_names, &block)
+        options = attr_names.extract_options!.symbolize_keys
+        validates_with BlockValidator, options.merge(:attributes => attr_names.flatten), &block
+      end
+
       # Adds a validation method or block to the class. This is useful when
       # overriding the +validate+ instance method becomes too unwieldly and
       # you're looking for more descriptive declaration of your validations.
@@ -40,43 +63,14 @@ module ActiveModel
       #   end
       #
       # This usage applies to +validate_on_create+ and +validate_on_update as well+.
-
-      # Validates each attribute against a block.
-      #
-      #   class Person < ActiveRecord::Base
-      #     validates_each :first_name, :last_name do |record, attr, value|
-      #       record.errors.add attr, 'starts with z.' if value[0] == ?z
-      #     end
-      #   end
-      #
-      # Options:
-      # * <tt>:on</tt> - Specifies when this validation is active (default is <tt>:save</tt>, other options <tt>:create</tt>, <tt>:update</tt>).
-      # * <tt>:allow_nil</tt> - Skip validation if attribute is +nil+.
-      # * <tt>:allow_blank</tt> - Skip validation if attribute is blank.
-      # * <tt>:if</tt> - Specifies a method, proc or string to call to determine if the validation should
-      #   occur (e.g. <tt>:if => :allow_validation</tt>, or <tt>:if => Proc.new { |user| user.signup_step > 2 }</tt>).  The
-      #   method, proc or string should return or evaluate to a true or false value.
-      # * <tt>:unless</tt> - Specifies a method, proc or string to call to determine if the validation should
-      #   not occur (e.g. <tt>:unless => :skip_validation</tt>, or <tt>:unless => Proc.new { |user| user.signup_step <= 2 }</tt>).  The
-      #   method, proc or string should return or evaluate to a true or false value.
-      def validates_each(*attrs)
-        options = attrs.extract_options!.symbolize_keys
-        attrs   = attrs.flatten
-
-        # Declare the validation.
-        send(validation_method(options[:on]), options) do |record|
-          attrs.each do |attr|
-            value = record.send(:read_attribute_for_validation, attr)
-            next if (value.nil? && options[:allow_nil]) || (value.blank? && options[:allow_blank])
-            yield record, attr, value
-          end
+      def validate(*args, &block)
+        options = args.last
+        if options.is_a?(Hash) && options.key?(:on)
+          options[:if] = Array(options[:if])
+          options[:if] << "@_on_validate == :#{options[:on]}"
         end
+        set_callback(:validate, *args, &block)
       end
-
-      private
-        def validation_method(on)
-          :validate
-        end
     end
 
     # Returns the Errors object that holds all information about attribute error messages.
@@ -87,7 +81,7 @@ module ActiveModel
     # Runs all the specified validations and returns true if no errors were added otherwise false.
     def valid?
       errors.clear
-      run_callbacks(:validate)
+      _run_validate_callbacks
       errors.empty?
     end
 
@@ -95,7 +89,7 @@ module ActiveModel
     def invalid?
       !valid?
     end
-    
+
     protected
       # Hook method defining how an attribute value should be retieved. By default this is assumed
       # to be an instance named after the attribute. Override this method in subclasses should you
@@ -106,9 +100,9 @@ module ActiveModel
       #     def initialize(data = {})
       #       @data = data
       #     end
-      #     
+      #
       #     private
-      #     
+      #
       #     def read_attribute_for_validation(key)
       #       @data[key]
       #     end

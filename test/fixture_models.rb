@@ -19,7 +19,8 @@ class Customer < CassandraObject::Base
   attribute :custom_storage, :type => String, :converter=>ReverseStorage
   
   validate :should_be_cool
-
+  validates_presence_of :last_name
+  
   key :uuid
   
   index :last_name, :reversed=>true

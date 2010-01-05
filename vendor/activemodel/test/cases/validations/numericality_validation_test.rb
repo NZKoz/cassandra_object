@@ -8,9 +8,10 @@ require 'models/person'
 
 class NumericalityValidationTest < ActiveModel::TestCase
   include ActiveModel::TestsDatabase
-  include ActiveModel::ValidationsRepairHelper
 
-  repair_validations(Topic)
+  def teardown
+    Topic.reset_callbacks(:validate)
+  end
 
   NIL = [nil]
   BLANK = ["", " ", " \t \r \n"]
@@ -106,6 +107,24 @@ class NumericalityValidationTest < ActiveModel::TestCase
     valid!([2])
   end
 
+  def test_validates_numericality_with_proc
+    Topic.send(:define_method, :min_approved, lambda { 5 })
+    Topic.validates_numericality_of :approved, :greater_than_or_equal_to => Proc.new {|topic| topic.min_approved }
+
+    invalid!([3, 4])
+    valid!([5, 6])
+    Topic.send(:remove_method, :min_approved)
+  end
+
+  def test_validates_numericality_with_symbol
+    Topic.send(:define_method, :max_approved, lambda { 5 })
+    Topic.validates_numericality_of :approved, :less_than_or_equal_to => :max_approved
+
+    invalid!([6])
+    valid!([4, 5])
+    Topic.send(:remove_method, :max_approved)
+  end
+
   def test_validates_numericality_with_numeric_message
     Topic.validates_numericality_of :approved, :less_than => 4, :message => "smaller than {{count}}"
     topic = Topic.new("title" => "numeric test", "approved" => 10)
@@ -120,37 +139,19 @@ class NumericalityValidationTest < ActiveModel::TestCase
     assert_equal ["greater than 4"], topic.errors[:approved]
   end
 
-  def test_numericality_with_getter_method
-    repair_validations(Developer) do
-      Developer.validates_numericality_of( :salary )
-      developer = Developer.new("name" => "michael", "salary" => nil)
-      developer.instance_eval("def salary; read_attribute('salary') ? read_attribute('salary') : 100000; end")
-      assert developer.valid?
-    end
-  end
-
-  def test_numericality_with_allow_nil_and_getter_method
-    repair_validations(Developer) do
-      Developer.validates_numericality_of( :salary, :allow_nil => true)
-      developer = Developer.new("name" => "michael", "salary" => nil)
-      developer.instance_eval("def salary; read_attribute('salary') ? read_attribute('salary') : 100000; end")
-      assert developer.valid?
-    end
-  end
-
   def test_validates_numericality_of_for_ruby_class
-    repair_validations(Person) do
-      Person.validates_numericality_of :karma, :allow_nil => false
+    Person.validates_numericality_of :karma, :allow_nil => false
 
-      p = Person.new
-      p.karma = "Pix"
-      assert p.invalid?
+    p = Person.new
+    p.karma = "Pix"
+    assert p.invalid?
 
-      assert_equal ["is not a number"], p.errors[:karma]
+    assert_equal ["is not a number"], p.errors[:karma]
 
-      p.karma = "1234"
-      assert p.valid?
-    end
+    p.karma = "1234"
+    assert p.valid?
+  ensure
+    Person.reset_callbacks(:validate)
   end
 
   private

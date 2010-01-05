@@ -3,9 +3,9 @@ require 'cases/tests_database'
 
 require 'models/person'
 
-class I18nGenerateMessageValidationTest < Test::Unit::TestCase
+class I18nGenerateMessageValidationTest < ActiveModel::TestCase
   def setup
-    reset_callbacks Person
+    Person.reset_callbacks(:validate)
     @person = Person.new
 
     @old_load_path, @old_backend = I18n.load_path, I18n.backend
@@ -45,12 +45,6 @@ class I18nGenerateMessageValidationTest < Test::Unit::TestCase
     I18n.backend = @old_backend
   end
 
-  def reset_callbacks(*models)
-    models.each do |model|
-      model.instance_variable_set("@validate_callbacks", ActiveSupport::Callbacks::CallbackChain.new)
-    end
-  end
-
   # validates_inclusion_of: generate_message(attr_name, :inclusion, :default => configuration[:message], :value => value)
   def test_generate_message_inclusion_with_default_message
     assert_equal 'is not included in the list', @person.errors.generate_message(:title, :inclusion, :default => nil, :value => 'title')
@@ -69,7 +63,6 @@ class I18nGenerateMessageValidationTest < Test::Unit::TestCase
     assert_equal 'custom message title', @person.errors.generate_message(:title, :exclusion, :default => 'custom message {{value}}', :value => 'title')
   end
 
-  # validates_associated: generate_message(attr_name, :invalid, :default => configuration[:message], :value => value)
   # validates_format_of:  generate_message(attr_name, :invalid, :default => configuration[:message], :value => value)
   def test_generate_message_invalid_with_default_message
     assert_equal 'is invalid', @person.errors.generate_message(:title, :invalid, :default => nil, :value => 'title')

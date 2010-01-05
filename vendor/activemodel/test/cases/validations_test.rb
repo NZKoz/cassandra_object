@@ -9,11 +9,12 @@ require 'models/custom_reader'
 
 class ValidationsTest < ActiveModel::TestCase
   include ActiveModel::TestsDatabase
-  include ActiveModel::ValidationsRepairHelper
 
   # Most of the tests mess with the validations of Topic, so lets repair it all the time.
   # Other classes we mess with will be dealt with in the specific tests
-  repair_validations(Topic)
+  def teardown
+    Topic.reset_callbacks(:validate)
+  end
 
   def test_single_field_validation
     r = Reply.new
@@ -70,6 +71,12 @@ class ValidationsTest < ActiveModel::TestCase
     assert_equal 2, r.errors.count
   end
 
+  def test_errors_on_nested_attributes_expands_name
+    t = Topic.new
+    t.errors["replies.name"] << "can't be blank"
+    assert_equal ["Replies name can't be blank"], t.errors.full_messages
+  end
+
   def test_errors_on_base
     r = Reply.new
     r.content = "Mismatch"
@@ -121,8 +128,8 @@ class ValidationsTest < ActiveModel::TestCase
   end
 
   def test_invalid_validator
-    Topic.validate 3
-    assert_raise(ArgumentError) { t = Topic.create }
+    Topic.validate :i_dont_exist
+    assert_raise(NameError) { t = Topic.create }
   end
 
   def test_errors_to_xml
@@ -141,6 +148,22 @@ class ValidationsTest < ActiveModel::TestCase
      t = Topic.new("title" => "")
      assert !t.valid?
      assert_equal "can't be blank", t.errors["title"].first
+    Topic.validates_presence_of :title, :author_name
+    Topic.validate {|topic| topic.errors.add('author_email_address', 'will never be valid')}
+    Topic.validates_length_of :title, :content, :minimum => 2
+
+    t = Topic.new :title => ''
+    assert !t.valid?
+
+    assert_equal :title, key = t.errors.keys.first
+    assert_equal "can't be blank", t.errors[key].first
+    assert_equal 'is too short (minimum is 2 characters)', t.errors[key].second
+    assert_equal :author_name, key = t.errors.keys.second
+    assert_equal "can't be blank", t.errors[key].first
+    assert_equal :author_email_address, key = t.errors.keys.third
+    assert_equal 'will never be valid', t.errors[key].first
+    assert_equal :content, key = t.errors.keys.fourth
+    assert_equal 'is too short (minimum is 2 characters)', t.errors[key].first
   end
 
   def test_invalid_should_be_the_opposite_of_valid

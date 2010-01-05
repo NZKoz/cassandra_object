@@ -1,7 +1,8 @@
 require 'active_support/core_ext/string/inflections'
+require 'active_support/ordered_hash'
 
 module ActiveModel
-  class Errors < Hash
+  class Errors < ActiveSupport::OrderedHash
     include DeprecatedErrorMethods
 
     def initialize(base)
@@ -92,20 +93,23 @@ module ActiveModel
     #   company = Company.create(:address => '123 First St.')
     #   company.errors.full_messages # =>
     #     ["Name is too short (minimum is 5 characters)", "Name can't be blank", "Address can't be blank"]
-    def full_messages(options = {})
+    def full_messages
       full_messages = []
 
       each do |attribute, messages|
-        messages = Array.wrap(messages)
+        messages = Array(messages)
         next if messages.empty?
 
         if attribute == :base
           messages.each {|m| full_messages << m }
         else
-          attr_name = attribute.to_s.humanize
-          prefix = attr_name + I18n.t('activemodel.errors.format.separator', :default => ' ')
+          attr_name = attribute.to_s.gsub('.', '_').humanize
+          attr_name = @base.class.human_attribute_name(attribute, :default => attr_name)
+          options = { :default => "{{attribute}} {{message}}", :attribute => attr_name,
+                      :scope => @base.class.i18n_scope }
+
           messages.each do |m|
-            full_messages <<  "#{prefix}#{m}"
+            full_messages << I18n.t(:"errors.format", options.merge(:message => m))
           end
         end
       end
@@ -113,7 +117,7 @@ module ActiveModel
       full_messages
     end
 
-    # Translates an error message in it's default scope (<tt>activemodel.errrors.messages</tt>).
+    # Translates an error message in its default scope (<tt>activemodel.errors.messages</tt>).
     # Error messages are first looked up in <tt>models.MODEL.attributes.ATTRIBUTE.MESSAGE</tt>, if it's not there,
     # it's looked up in <tt>models.MODEL.MESSAGE</tt> and if that is not there it returns the translation of the
     # default message (e.g. <tt>activemodel.errors.messages.MESSAGE</tt>). The translated model name,
@@ -134,10 +138,7 @@ module ActiveModel
     def generate_message(attribute, message = :invalid, options = {})
       message, options[:default] = options[:default], message if options[:default].is_a?(Symbol)
 
-      klass_ancestors = [@base.class]
-      klass_ancestors += @base.class.ancestors.reject {|x| x.is_a?(Module)}
-
-      defaults = klass_ancestors.map do |klass|
+      defaults = @base.class.lookup_ancestors.map do |klass|
         [ :"models.#{klass.name.underscore}.attributes.#{attribute}.#{message}",
           :"models.#{klass.name.underscore}.#{message}" ]
       end
@@ -149,10 +150,10 @@ module ActiveModel
       value = @base.send(:read_attribute_for_validation, attribute)
 
       options = { :default => defaults,
-        :model => @base.class.name.humanize,
-        :attribute => attribute.to_s.humanize,
+        :model => @base.class.model_name.human,
+        :attribute => @base.class.human_attribute_name(attribute),
         :value => value,
-        :scope => [:activemodel, :errors]
+        :scope => [@base.class.i18n_scope, :errors]
       }.merge(options)
 
       I18n.translate(key, options)
