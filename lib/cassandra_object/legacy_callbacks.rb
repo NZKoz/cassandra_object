@@ -4,7 +4,7 @@ module CassandraObject
     include ActiveSupport::Callbacks
     
     included do
-      define_model_callbacks :save, :create, :destroy
+      define_model_callbacks :save, :create, :destroy, :update
     end
     
     module ClassMethods
@@ -20,8 +20,9 @@ module CassandraObject
       def run_callbacks(callback)
         if block_given?
           unless false == super("before_#{callback}")
-            yield
-            super("after_#{callback}")
+            yield.tap do
+              super("after_#{callback}")
+            end
           end
         else
           super
