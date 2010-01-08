@@ -149,7 +149,7 @@ class TypesTest < CassandraObjectTestCase
 
       should "return a properly formated string for a legit time" do
         t = Time.now
-        formatted = t.xmlschema
+        formatted = t.xmlschema(6)
         assert_equal(formatted, CassandraObject::TimeType.encode(t))
       end
 
