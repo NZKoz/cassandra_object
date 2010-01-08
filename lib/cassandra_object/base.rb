@@ -11,7 +11,6 @@ else
 end
 
 require 'cassandra_object/validation'
-
 require 'cassandra_object/identity'
 require 'cassandra_object/indexes'
 require 'cassandra_object/serialization'
@@ -42,7 +41,15 @@ module CassandraObject
       end
     end
     extend Naming
-
+    
+    if CassandraObject.old_active_support
+      def self.lookup_ancestors
+        super.select { |x| x.model_name.present? }
+      end
+    end
+    
+    extend ActiveModel::Naming
+    
     include Callbacks
     include Identity
     include Attributes
