@@ -78,6 +78,10 @@ module CassandraObject
           memo
         end
       end
+      
+      def column_family_configuration
+        [{:Name=>column_family, :CompareWith=>"UTF8Type"}]
+      end
     end
 
     module InstanceMethods

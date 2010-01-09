@@ -35,6 +35,10 @@ module CassandraObject
       def column_family
         @model_class.column_family + "By" + @attribute_name.to_s.camelize 
       end
+      
+      def column_family_configuration
+        {:Name=>column_family, :CompareWith=>"UTF8Type"}
+      end
     end
     
     class Index
@@ -66,9 +70,22 @@ module CassandraObject
       def new_key
         Cassandra::UUID.new
       end
+      
+      def column_family_configuration
+        {:Name=>column_family, :CompareWith=>"UTF8Type", :ColumnType=>"Super", :CompareSubcolumnsWith=>"TimeUUIDType"}
+      end
+      
     end
     
     module ClassMethods
+      def column_family_configuration
+        if indexes
+          super + indexes.values.map(&:column_family_configuration)
+        else
+          super
+        end
+      end
+      
       def index(attribute_name, options = {})
         self.indexes ||= {}.with_indifferent_access
         if options.delete(:unique)

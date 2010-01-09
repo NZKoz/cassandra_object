@@ -26,6 +26,16 @@ task :cleanup do
   puts "Cleared"
 end
 
+task :config_snippet do
+  unless defined?(CassandraObject)
+    $: << 'test'
+    $: << 'lib'
+    require 'test_helper'
+  end
+  
+  puts CassandraObject::Base.storage_config_xml
+end
+
 task :default=>[:test, :cleanup] do
 end
 

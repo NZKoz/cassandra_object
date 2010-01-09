@@ -50,6 +50,24 @@ module CassandraObject
     
     extend ActiveModel::Naming
     
+    module ConfigurationDumper
+      def storage_config_xml
+        subclasses.map(&:constantize).map(&:column_family_configuration).flatten.map do |config|
+          config_to_xml(config)
+        end.join("\n")
+      end
+      
+      def config_to_xml(config)
+        xml = "<ColumnFamily "
+        config.each do |(attr_name, attr_value)|
+          xml << " #{attr_name}=\"#{attr_value}\""
+        end
+        xml << " />"
+        xml
+      end
+    end
+    extend ConfigurationDumper
+    
     include Callbacks
     include Identity
     include Attributes

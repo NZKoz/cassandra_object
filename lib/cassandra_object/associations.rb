@@ -10,6 +10,10 @@ module CassandraObject
     end
 
     module ClassMethods
+      def column_family_configuration
+        super << {:Name=>"#{name}Relationships", :CompareWith=>"UTF8Type", :CompareSubcolumnsWith=>"TimeUUIDType", :ColumnType=>"Super"}
+      end
+      
       def association(association_name, options= {})
         if options[:unique]
           write_inheritable_hash(:associations, {association_name => OneToOneAssociation.new(association_name, self, options)})
