@@ -1,0 +1,2 @@
+* Support for compound keys for associations e.g. "#{customer_id}:#{invoice_date}"
+* Support for alternate column names in associations and indexes
