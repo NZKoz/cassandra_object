@@ -64,18 +64,11 @@ There isn't much in the way of documentation yet, but a few examples.
 
 Here are some basic directions:
 
-  1. Clone Evan Weaver's cassandra gem repository: `git clone git://github.com/fauna/cassandra.git`
-  2. `sudo gem install echoe`
-  3. `rake cassandra`
-  4. `git clone git://github.com/NZKoz/cassandra_object.git`
-  5. You can now drop into irb, and require 'cassandra_object/lib/cassandra_object'
-  6. CassandraObject::Base.establish_connection "Twitter"
-  7. Create a class that inherits from CassandraObject::Base
-    8.1. Note that you'll need to modify storage-conf.xml in the cassandra repository you cloned in step #1 if you want to change the column families or anything.
+  1. `git clone git://github.com/NZKoz/cassandra_object.git`
+  2. Run the bundler `gem bundle`
+  3. Make sure the tests pass `rake test`
 
-Sorry, it's hard right now.  If you can't figure it out you should ask nzkoz for help on #cassandra on freenode.
-
-You need to have a checkout of edge rails in ../rails if you want to run the tests.
+This gem has backwards compatibility with active support version 2.3.x,  this is to enable people to use it with rails 2.3 applications.  This backwards compatibility may not continue after the 1.0 release.
 
 ## Should I use this in production?
 
