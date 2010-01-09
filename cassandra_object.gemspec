@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name    = 'cassandra_object'
-  s.version = '0.5.0'
+  s.version = '0.5.0.pre'
   s.email   = "michael@koziarski.com"
   s.author  = "Michael Koziarski"
 
