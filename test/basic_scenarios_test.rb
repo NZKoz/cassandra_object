@@ -33,11 +33,11 @@ class BasicScenariosTest < CassandraObjectTestCase
       @customer.date_of_birth = 24.5
     end
   end
-  
+
   test "should return nil for attributes without a value" do
     assert_nil @customer.preferences
   end
-  
+
   test "should let a user set a Hash valued attribute" do
     val = {"a"=>"b"}
     @customer.preferences = val
@@ -53,7 +53,7 @@ class BasicScenariosTest < CassandraObjectTestCase
       @customer.date_of_birth = "35345908"
     }
   end
-  
+
   test "should have a schema version of 0" do
     assert_equal 0, @customer.schema_version
   end
@@ -72,14 +72,14 @@ class BasicScenariosTest < CassandraObjectTestCase
     raw_result = Invoice.connection.get("Invoices", @invoice.key.to_s)
     assert_equal Invoice.current_schema_version, ActiveSupport::JSON.decode(raw_result["schema_version"])
   end
-  
+
   test "to_param works" do
     invoice = mock_invoice
     param = invoice.to_param
     assert_match /[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/, param
     assert_equal invoice.key, Invoice.parse_key(param)
   end
-  
+
   test "setting a column_family" do
     class Foo < CassandraObject::Base
       self.column_family = 'Bar'
@@ -187,5 +187,40 @@ class BasicScenariosTest < CassandraObjectTestCase
     assert_equal "olleh", raw_result["custom_storage"]
     assert_equal "hello", @customer.reload.custom_storage
     
+  end
+
+  context "setting valid consistency levels" do
+    setup do
+      class Senate < CassandraObject::Base
+        consistency_levels :write => :quorum, :read => :quorum
+      end
+    end
+
+    should "should have the settings" do
+      assert_equal :quorum, Senate.write_consistency
+      assert_equal :quorum, Senate.read_consistency
+    end
+  end
+
+  context "setting invalid consistency levels" do
+    context "invalid write consistency" do
+      should "raise an error" do
+        assert_raises(ArgumentError) do
+          class BadWriter < CassandraObject::Base
+            consistency_levels :write => :foo, :read => :quorum
+          end
+        end
+      end
+    end
+
+    context "invalid read consistency" do
+      should "raise an error" do
+        assert_raises(ArgumentError) do
+          class BadReader < CassandraObject::Base
+            consistency_levels :write => :quorum, :read => :foo
+          end
+        end
+      end
+    end
   end
 end
