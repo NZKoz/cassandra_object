@@ -16,6 +16,12 @@ class IndexTest < CassandraObjectTestCase
       @wife.destroy
       assert_equal [@koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
     end
+    
+    should "return a single value when the original one is changed" do
+      @wife.last_name = "WTF"
+      @wife.save
+      assert_equal [@koz.key], Customer.find_all_by_last_name(@last_name).map(&:key)
+    end
   end
 
   context "A corrupt non-unique index" do

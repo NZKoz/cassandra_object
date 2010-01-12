@@ -6,6 +6,7 @@ module CassandraObject
       @key           = key.to_s
       @super_column  = super_column
       @options       = options
+      @validators    = []
     end
     
     def find(number_to_find)
@@ -46,7 +47,7 @@ module CassandraObject
           @target_class.multi_get(missing_keys, :quorum=>true).each do |(key, result)|
             index_key = index_results.index(key)
             if result.nil?
-              connection.remove(@column_family, @key, @super_column, index_key)
+              remove(index_key)
               results.delete(key)
             else
               results[key] = result
@@ -55,7 +56,11 @@ module CassandraObject
         end
 
         results.values.each do |o|
-          objects << o
+          if @validators.all? {|v| v.call(o) }
+            objects << o
+          else
+            remove(index_results.index(o.key))
+          end
         end
         
         start_with = objects.last_column_name = keys.last
@@ -68,6 +73,14 @@ module CassandraObject
     
     def connection
       @target_class.connection
+    end
+    
+    def remove(index_key)
+      connection.remove(@column_family, @key, @super_column, index_key)
+    end
+    
+    def validator(&validator)
+      @validators << validator
     end
   end
 end

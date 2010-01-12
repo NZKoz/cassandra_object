@@ -50,6 +50,9 @@ module CassandraObject
       
       def find(attribute_value, options = {})
         cursor = CassandraObject::Cursor.new(@model_class, column_family, attribute_value.to_s, @attribute_name.to_s, :start_after=>options[:start_after], :reversed=>@reversed)
+        cursor.validator do |object|
+          object.send(@attribute_name) == attribute_value
+        end
         cursor.find(options[:limit] || 100)
       end
       
@@ -58,9 +61,6 @@ module CassandraObject
       end
       
       def remove(record)
-        # FIXME - this is hard to scale, how can I get the column name to remove without iterating
-        # over *all* the values.  Instead, rely on read-repair for now.
-        # @model_class.connection.remove(column_family, record.send(@attribute_name).to_s, @attribute_name.to_s, record.key)
       end
       
       def column_family
