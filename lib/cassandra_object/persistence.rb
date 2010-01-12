@@ -124,9 +124,9 @@ module CassandraObject
       end
 
       def consistency_for_thrift(consistency)
-        { 
+        {
           :zero   => Cassandra::Consistency::ZERO,
-          :one    => Cassandra::Consistency::QUORUM, 
+          :one    => Cassandra::Consistency::ONE, 
           :quorum => Cassandra::Consistency::QUORUM,
           :all    => Cassandra::Consistency::ALL
         }[consistency]
