@@ -223,4 +223,17 @@ class BasicScenariosTest < CassandraObjectTestCase
       end
     end
   end
+
+  test "ignoring columns we don't know about" do
+    # if there's a column in the row that's not configured as an attribute, it should be ignored with no errors
+
+    payment = Payment.new(:reference_number => 'abc123', :amount => 26)
+    payment.save
+
+    Payment.connection.insert(Payment.column_family, payment.key.to_s, {"bogus" => 'very bogus', "schema_version" => payment.schema_version.to_s}, :consistency => Payment.send(:write_consistency_for_thrift))
+
+    assert_nothing_raised do
+      Payment.get(payment.key)
+    end
+  end
 end

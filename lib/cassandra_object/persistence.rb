@@ -81,6 +81,9 @@ module CassandraObject
       end
 
       def instantiate(key, attributes)
+        # remove any attributes we don't know about. we would do this earlier, but we want to make such
+        #  attributes available to migrations
+        attributes.delete_if{|k,_| !model_attributes.keys.include?(k)}
         returning allocate do |object|
           object.instance_variable_set("@schema_version", attributes.delete('schema_version'))
           object.instance_variable_set("@key", parse_key(key))
