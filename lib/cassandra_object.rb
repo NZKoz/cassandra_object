@@ -1,4 +1,4 @@
-
+require 'rubygems'
 require 'i18n'
 require 'active_support'
 require 'active_support/version'

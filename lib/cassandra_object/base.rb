@@ -19,14 +19,20 @@ require 'cassandra_object/migrations'
 require 'cassandra_object/cursor'
 require 'cassandra_object/collection'
 require 'cassandra_object/types'
+require 'cassandra_object/mocking'
 
 module CassandraObject
   class Base
-    
     class_inheritable_accessor :connection
+    class_inheritable_writer :connection_class
+
+    def self.connection_class
+      read_inheritable_attribute(:connection_class) || Cassandra
+    end
+
     module ConnectionManagement
       def establish_connection(*args)
-        self.connection = Cassandra.new(*args)
+        self.connection = connection_class.new(*args)
       end
     end
     extend ConnectionManagement
@@ -83,7 +89,7 @@ module CassandraObject
 
     include Serialization
     include Migrations
-
+    include Mocking
 
     def initialize(attributes={})
       @key = attributes.delete(:key)

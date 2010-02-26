@@ -1,4 +1,4 @@
-require 'vendor/gems/environment'
+# require 'vendor/gems/environment'
 
 require 'cassandra_object'
 require 'connection'
