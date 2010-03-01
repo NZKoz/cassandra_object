@@ -203,4 +203,50 @@ class TypesTest < CassandraObjectTestCase
       end
     end
   end
+
+  context "BooleanType" do
+    context "encode" do
+      should "handle true" do
+        assert_nothing_raised {
+          assert_equal '1', CassandraObject::BooleanType.encode(true)
+        }
+      end
+
+      should "handle false" do
+        assert_nothing_raised {
+          assert_equal '0', CassandraObject::BooleanType.encode(false)
+        }
+      end
+
+      should "handle nil" do
+        assert_nothing_raised {
+          assert_equal '0', CassandraObject::BooleanType.encode(nil)
+        }
+      end
+
+      should "not handle normal objects" do
+        assert_raises(ArgumentError) {
+          assert_equal '1', CassandraObject::BooleanType.encode(Object.new)
+        }
+      end
+    end
+
+    context "decode" do
+      should "handle true" do
+        assert_nothing_raised {
+          assert_equal true, CassandraObject::BooleanType.decode('1')
+        }
+      end
+
+      should "handle false" do
+        assert_nothing_raised {
+          assert_equal false, CassandraObject::BooleanType.decode('0')
+        }
+      end
+
+      should "handle bad data as false" do
+        assert_equal false, CassandraObject::BooleanType.decode('')
+      end
+    end
+  end
 end

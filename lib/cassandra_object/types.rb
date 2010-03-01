@@ -109,4 +109,20 @@ module CassandraObject
     end
     module_function :decode
   end
+
+  module BooleanType
+    ALLOWED = [true, false, nil]
+    def encode(bool)
+      unless ALLOWED.any?{ |a| bool == a }
+          raise ArgumentError.new("#{self} requires a Boolean or nil")
+      end
+      bool ? '1' : '0'
+    end
+    module_function :encode
+
+    def decode(bool)
+      bool == '1'
+    end
+    module_function :decode
+  end
 end
