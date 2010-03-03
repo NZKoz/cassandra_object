@@ -4,3 +4,4 @@ doc/
 bin/*
 vendor/gems/*
 !vendor/gems/cache/
+.bundle

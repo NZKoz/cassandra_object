@@ -1,4 +1,6 @@
-# require 'vendor/gems/environment'
+require 'rubygems'
+require 'bundler'
+Bundler.setup(:optional, :groups)
 
 require 'cassandra_object'
 require 'connection'
