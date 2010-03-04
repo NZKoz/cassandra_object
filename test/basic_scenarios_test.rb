@@ -23,6 +23,10 @@ class BasicScenariosTest < CassandraObjectTestCase
     assert_equal "Koziarski", other_customer.last_name
     assert_equal Date.parse("1980-08-15"), other_customer.date_of_birth
   end
+  
+  test "a new object is included in Model.all" do
+    assert Customer.all.include?(@customer)
+  end
 
   test "date_of_birth is a date" do
     assert @customer.date_of_birth.is_a?(Date)
