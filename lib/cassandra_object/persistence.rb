@@ -157,6 +157,7 @@ module CassandraObject
           @key ||= self.class.next_key(self)
           _write
           @new_record = false
+          true
         end
       end
       
