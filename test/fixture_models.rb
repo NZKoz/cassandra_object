@@ -28,6 +28,7 @@ class Customer < CassandraObject::Base
   index :last_name, :reversed=>true
 
   association :invoices, :unique=>false, :inverse_of=>:customer, :reversed=>true
+  association :paid_invoices, :unique=>false, :class_name=>'Invoice'
 
   def after_create_called?
     @after_create_called

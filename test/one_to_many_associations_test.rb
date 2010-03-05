@@ -74,6 +74,25 @@ class OneToManyAssociationsTest < CassandraObjectTestCase
     end
   end
   
+  context "A customer with an invoice added to its paid invoices association (which has no explicit reversed option)" do
+    setup do
+      @customer = Customer.create :first_name    => "Michael",
+                                  :last_name     => "Koziarski",
+                                  :date_of_birth => Date.parse("1980/08/15")
+
+      assert @customer.valid?, @customer.errors
+
+      @invoice  = mock_invoice
+      assert @invoice.valid?, @invoice.errors
+
+      @customer.paid_invoices << @invoice
+    end
+
+    should "return invoice from association" do
+      assert_equal @invoice, @customer.paid_invoices.to_a.first
+    end
+  end
+
   context "Association proxy create" do
     setup do
       @customer = Customer.create! :first_name    => "Michael",
