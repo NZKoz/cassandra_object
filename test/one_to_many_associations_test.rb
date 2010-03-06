@@ -2,6 +2,20 @@ require 'test_helper'
 
 class OneToManyAssociationsTest < CassandraObjectTestCase
   
+  context "A customer with no invoices added to its invoice association" do 
+    setup do
+      @customer = Customer.create :first_name    => "Michael",
+                                  :last_name     => "Koziarski",
+                                  :date_of_birth => Date.parse("1980/08/15")
+
+      assert @customer.valid?, @customer.errors                            
+    end
+    
+    should "return an empty array for the association" do
+      assert_equal [], @customer.invoices.to_a 
+    end
+  end
+  
   context "A customer with an invoice added to its invoice association" do 
     setup do
       @customer = Customer.create :first_name    => "Michael",

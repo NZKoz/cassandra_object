@@ -36,7 +36,7 @@ module CassandraObject
         
         missing_keys = []
         
-        results = @target_class.multi_get(values)
+        results = values.empty? ? {} : @target_class.multi_get(values)
         results.each do |(key, result)|
           if result.nil?
             missing_keys << key
