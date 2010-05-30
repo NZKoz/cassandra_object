@@ -100,12 +100,12 @@ module CassandraObject
   module HashType
     def encode(hash)
       raise ArgumentError.new("#{self} requires a Hash") unless hash.kind_of?(Hash)
-      hash.to_json
+      ActiveSupport::JSON.encode(hash)
     end
     module_function :encode
 
     def decode(str)
-      JSON::parse(str)
+      ActiveSupport::JSON.decode(str)
     end
     module_function :decode
   end
