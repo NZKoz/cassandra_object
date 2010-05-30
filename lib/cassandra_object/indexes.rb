@@ -68,7 +68,7 @@ module CassandraObject
       end
       
       def new_key
-        Cassandra::UUID.new
+        SimpleUUID::UUID.new
       end
       
       def column_family_configuration

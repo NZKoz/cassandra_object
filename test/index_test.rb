@@ -28,7 +28,7 @@ class IndexTest < CassandraObjectTestCase
     setup do
       @last_name = ActiveSupport::SecureRandom.hex(5)
       @koz = Customer.create :first_name=>"Michael", :last_name=>@last_name, :date_of_birth=>28.years.ago.to_date
-      connection.insert("CustomersByLastName", @last_name, {"last_name"=>{Cassandra::UUID.new=>"ROFLSKATES"}})
+      connection.insert("CustomersByLastName", @last_name, {"last_name"=>{SimpleUUID::UUID.new=>"ROFLSKATES"}})
       @wife = Customer.create :first_name=>"Anika", :last_name=>@last_name, :date_of_birth=>30.years.ago.to_date
     end
     
